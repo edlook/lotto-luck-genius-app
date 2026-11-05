@@ -1,0 +1,323 @@
+@import "tailwindcss";
+
+/*
+ * Lotto-Luck-Genius design system — "night ledger" (texts/site-structure.md §5).
+ * Dark theme only. Gold marks a result or the main action; it is never a background
+ * wash or a glow on every element. No light theme on purpose.
+ *
+ * Tokens are HSL triples in :root (so they can be read by scripts/check-contrast.mjs
+ * and combined with alpha), exposed to Tailwind through @theme below.
+ * Contrast ratios (WCAG 2.x) are checked by `npm run contrast`; values in the
+ * comments are its output.
+ */
+
+:root {
+  --background: 220 30% 12%; /* #151C28 = theme-color */
+  --foreground: 48 100% 96%;
+  --card: 220 25% 16%;
+  --card-foreground: 48 100% 96%;
+  --surface-2: 220 22% 20%; /* raised: sheets, menus, sticky bars */
+
+  --primary: 45 93% 58%; /* gold: CTA, main balls, active navigation */
+  --primary-strong: 38 92% 50%; /* gradient end of the main ball */
+  --primary-foreground: 220 30% 12%;
+  --secondary: 215 50% 45%;
+  --secondary-foreground: 48 100% 96%;
+  --accent: 142 76% 56%; /* green: Euro numbers / Superzahl, "win" */
+  --accent-foreground: 220 30% 12%;
+
+  --muted: 220 20% 25%;
+  --muted-foreground: 220 12% 74%;
+
+  --border: 220 20% 25%; /* decorative dividers only (not for controls) */
+  --border-strong: 220 14% 52%; /* borders of inputs and controls: >= 3:1 */
+  --ring: 45 93% 58%;
+
+  --success: 142 76% 56%;
+  --success-foreground: 220 30% 12%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 220 30% 12%;
+  --danger: 0 84% 70%; /* error text and danger fills (with dark text) */
+  --danger-foreground: 220 30% 12%;
+
+  --ball-main-from: 45 93% 58%;
+  --ball-main-to: 38 92% 50%;
+  --ball-special: 142 76% 56%;
+  --ball-empty: 220 20% 25%;
+
+  /* layout */
+  --topbar-h: 56px;
+  --gameswitch-h: 52px;
+  --bottomnav-h: 64px;
+  --sidebar-w: 240px;
+  --content-max: 960px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@theme inline {
+  /* Only our palette: Tailwind's default colours are switched off. */
+  --color-*: initial;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-surface-2: hsl(var(--surface-2));
+  --color-primary: hsl(var(--primary));
+  --color-primary-strong: hsl(var(--primary-strong));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-border-strong: hsl(var(--border-strong));
+  --color-ring: hsl(var(--ring));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-danger: hsl(var(--danger));
+  --color-danger-foreground: hsl(var(--danger-foreground));
+  --color-ball-empty: hsl(var(--ball-empty));
+
+  --font-sans: "Manrope Variable", "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Type scale 13 / 16 / 20 / 28 / 40 px (§5.2). Body text never below 16 px. */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.25rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-title-3: 1.25rem;
+  --text-title-3--line-height: 1.75rem;
+  --text-title-2: 1.75rem;
+  --text-title-2--line-height: 2.25rem;
+  --text-title-1: 2.5rem;
+  --text-title-1--line-height: 3rem;
+
+  /* Radii: --radius 1rem is the card radius from the brief. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* Shadows: soft depth only, no gold glow. */
+  --shadow-soft: 0 2px 6px hsl(220 30% 6% / 0.5);
+  --shadow-raised: 0 12px 32px hsl(220 30% 6% / 0.55), 0 2px 6px hsl(220 30% 6% / 0.4);
+
+  /* Motion tokens (emil-design-eng). Never ease-in for UI. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-tap-highlight-color: transparent; /* our own :active feedback replaces the grey flash */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior: none; /* app shell: no pull-to-refresh hijacking */
+    /* sticky bars must not hide the focused element (WCAG 2.4.11) */
+    scroll-padding-top: calc(var(--topbar-h) + var(--gameswitch-h) + var(--safe-top) + 8px);
+    scroll-padding-bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + 8px);
+  }
+
+  @media (min-width: 64rem) {
+    html {
+      scroll-padding-top: 16px;
+      scroll-padding-bottom: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* iOS zooms into inputs under 16 px; fix the cause instead of disabling zoom. */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  button,
+  a,
+  [role="button"],
+  [role="tab"],
+  [role="radio"],
+  summary {
+    touch-action: manipulation; /* no double-tap-zoom delay */
+  }
+
+  /* Controls are not content: long-press must not select their labels. Links stay selectable. */
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="radio"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* One visible focus ring for everything: 2 px gold + 2 px offset (WCAG 2.4.7 / 2.4.11). */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.35);
+  }
+
+  /* Native <dialog>: lock page scroll while a modal is open. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+/*
+ * Reduced motion: fewer and gentler, not zero (emil-design-eng). Movement (transforms,
+ * slides, shimmer) is removed; short opacity/colour fades stay because they aid
+ * comprehension. Components use `motion-safe:` for transforms; this is the safety net.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Dialog / Sheet (native <dialog>) ---------- */
+@layer components {
+  .llg-dialog {
+    opacity: 0;
+    transition:
+      opacity 200ms var(--ease-out),
+      transform 240ms var(--ease-out),
+      overlay 240ms allow-discrete,
+      display 240ms allow-discrete;
+  }
+  .llg-dialog[open] {
+    opacity: 1;
+  }
+  .llg-dialog::backdrop {
+    background-color: hsl(220 30% 4% / 0);
+    transition:
+      background-color 200ms var(--ease-out),
+      overlay 240ms allow-discrete,
+      display 240ms allow-discrete;
+  }
+  .llg-dialog[open]::backdrop {
+    background-color: hsl(220 30% 4% / 0.7);
+  }
+  @starting-style {
+    .llg-dialog[open] {
+      opacity: 0;
+    }
+    .llg-dialog[open]::backdrop {
+      background-color: hsl(220 30% 4% / 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .llg-dialog[data-variant="center"] {
+      transform: scale(0.96);
+    }
+    .llg-dialog[data-variant="center"][open] {
+      transform: scale(1);
+    }
+    @starting-style {
+      .llg-dialog[data-variant="center"][open] {
+        transform: scale(0.96);
+      }
+    }
+
+    /* Bottom sheet on phones, centred dialog from 1024 px. */
+    @media (max-width: 63.999rem) {
+      .llg-dialog[data-variant="sheet"] {
+        transform: translateY(100%);
+        transition-timing-function: var(--ease-drawer);
+        transition-duration: 320ms;
+      }
+      .llg-dialog[data-variant="sheet"][open] {
+        transform: translateY(0);
+      }
+      @starting-style {
+        .llg-dialog[data-variant="sheet"][open] {
+          transform: translateY(100%);
+        }
+      }
+    }
+  }
+
+  /* ---------- Toast ---------- */
+  .llg-toast {
+    transition:
+      opacity 200ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  @starting-style {
+    .llg-toast {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @starting-style {
+      .llg-toast {
+        transform: translateY(8px);
+      }
+    }
+  }
+
+  /* ---------- Skeleton ---------- */
+  .llg-skeleton {
+    background-color: hsl(var(--muted) / 0.6);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--foreground) / 0.06) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .llg-skeleton {
+      animation: var(--animate-shimmer);
+    }
+  }
+}
