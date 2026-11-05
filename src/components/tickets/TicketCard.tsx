@@ -13,8 +13,9 @@ import { ticketCardId } from "./ticketIds";
 export interface TicketCardProps {
   ticket: Ticket;
   evaluation: TicketEvaluation;
-  onEdit: () => void;
-  onDelete: () => void;
+  /** Not needed with `onlyDate` (no actions are shown there). */
+  onEdit?: () => void;
+  onDelete?: () => void;
   /** Heading level inside the page. */
   level?: 2 | 3;
   /** Compact variant for the draw detail screen: no actions, only this date. */
@@ -214,7 +215,7 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
         </p>
       ) : null}
 
-      {onlyDate ? null : (
+      {onlyDate || !onEdit || !onDelete ? null : (
         <footer className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
           <span className="mr-auto text-caption text-muted-foreground">
             {t(`tickets.card.source.${ticket.source}`)}
