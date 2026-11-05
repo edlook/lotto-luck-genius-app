@@ -30,8 +30,9 @@ export interface DrawSet {
   refetch: () => void;
 }
 
-export function useDraws(game: GameId): DrawSet {
-  const q = useArchive(game);
+/** @param enabled false = use cached data only, do not fetch (see useArchive). */
+export function useDraws(game: GameId, enabled = true): DrawSet {
+  const q = useArchive(game, enabled);
   const userDraws = useLocalStore(userDrawsStore);
   const { data, isLoading, isError, refetch } = q;
   const today = berlinNow().date;

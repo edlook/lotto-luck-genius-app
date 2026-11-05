@@ -37,7 +37,7 @@ function SideLink({ item, badge, badgeLabel }: { item: NavItem; badge?: number; 
 }
 
 /** Desktop (≥ 1024 px): name → game switch → 5 screens → about/settings → language and data status. */
-export function SideNav({ waiting, dataStatus }: { waiting: number; dataStatus: string }) {
+export function SideNav({ waiting, dataStatus }: { waiting: number; dataStatus: string | null }) {
   const { t, tp } = useI18n();
   const langId = useId();
   return (
@@ -70,7 +70,8 @@ export function SideNav({ waiting, dataStatus }: { waiting: number; dataStatus: 
           {t("topbar.language")}
         </p>
         <LanguageSwitch labelledBy={langId} compact />
-        <p className="px-1 text-caption text-muted-foreground">{dataStatus}</p>
+        {/* Empty while the archive is still loading in the background: no false "not loaded". */}
+        <p className="min-h-5 px-1 text-caption text-muted-foreground">{dataStatus}</p>
       </div>
     </aside>
   );

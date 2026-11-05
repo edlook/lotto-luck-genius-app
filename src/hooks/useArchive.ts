@@ -81,15 +81,20 @@ export interface ArchiveState {
   refetch: () => void;
 }
 
-export function useArchive(game: GameId): ArchiveState {
+/**
+ * @param enabled false = only read what is already cached (another screen may have loaded it),
+ *                never start a request. Used by the app shell so that screens without draws
+ *                (/odds, /about) do not download the archive for the navigation badge.
+ */
+export function useArchive(game: GameId, enabled = true): ArchiveState {
   const entry = useSyncExternalStore(
     subscribe,
     () => entries.get(game) ?? IDLE,
     () => IDLE,
   );
   useEffect(() => {
-    void loadArchive(game);
-  }, [game]);
+    if (enabled) void loadArchive(game);
+  }, [game, enabled]);
   const refetch = useCallback(() => void loadArchive(game, true), [game]);
   return {
     data: entry.data,

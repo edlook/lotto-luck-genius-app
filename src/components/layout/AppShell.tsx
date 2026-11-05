@@ -4,9 +4,11 @@ import { Toaster } from "@/components/ui";
 import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
+import { useIdle } from "@/hooks/useIdle";
+import { DESKTOP_QUERY, useMediaQuery } from "@/hooks/useMediaQuery";
 import { ticketsStore } from "@/lib/storage/stores";
 import { useLocalStore } from "@/lib/storage/localStore";
-import { evaluateTicket } from "@/lib/ticketStatus";
+import { countWaitingForData } from "@/lib/ticketSummary";
 import { berlinNow } from "@/lib/drawCalendar";
 import { BottomNav } from "./BottomNav";
 import { SideNav } from "./SideNav";
@@ -35,22 +37,31 @@ function useScrollManagement() {
 export function AppShell() {
   const { t, date } = useI18n();
   const [game] = useGame();
-  const draws = useDraws(game);
   const tickets = useLocalStore(ticketsStore);
   const { pathname } = useLocation();
   useScrollManagement();
 
+  // The badge and the sidebar data line need the draw archive (~280 KB for EuroJackpot).
+  // Never let them compete with the first render: start the request only when the browser
+  // is idle, and only if there is something to show (tickets of this game, or the sidebar
+  // on wide screens). Screens that need draws load them themselves; the shell then reuses
+  // the cached copy for free.
+  const idle = useIdle();
+  const wide = useMediaQuery(DESKTOP_QUERY);
+  const hasTickets = tickets.some((tk) => tk.game === game);
+  const draws = useDraws(game, idle && (hasTickets || wide));
+
   // Tickets of the current game whose draw already took place but is not loaded yet.
-  const waiting = useMemo(() => {
-    if (!draws.draws.length) return 0;
-    const today = berlinNow().date;
-    return tickets.filter((tk) => tk.game === game && evaluateTicket(tk, draws.byDate, today).notLoaded.length > 0)
-      .length;
-  }, [tickets, game, draws.byDate, draws.draws.length]);
+  const waiting = useMemo(
+    () => (draws.draws.length && hasTickets ? countWaitingForData(tickets, game, draws.byDate, berlinNow().date) : 0),
+    [tickets, game, draws.byDate, draws.draws.length, hasTickets],
+  );
 
   const dataStatus = draws.lastDate
     ? t("sidebar.dataStatus", { date: date(draws.lastDate) })
-    : t("sidebar.dataStatus.none");
+    : draws.isLoading
+      ? null
+      : t("sidebar.dataStatus.none");
 
   return (
     <div className="min-h-dvh lg:flex">
