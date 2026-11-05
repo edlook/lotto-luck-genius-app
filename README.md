@@ -30,11 +30,17 @@ src/
   styles/fonts.css        Manrope Variable, Cyrillic + Latin subsets only
   components/ui/          own UI primitives (see below)
   components/layout/      AppShell, TopBar, BottomNav, SideNav, GameSwitch, LanguageSwitch, PageHeader
+  components/common/      HonestyNote, NumberPicker (slip grid + text), PopularityReport, Disclosure,
+                          ConfirmDialog, DrawDataStatus, focusLater
+  components/tickets/     TicketCard, TicketEditor (sheet), SaveTicketPanel, useTicketTransfer (JSON)
+  components/stats/       FrequencyChart (CSS bars + table), CompareTable
   pages/                  one file per route
-  hooks/                  useGame, useDraws, useArchive, usePageMeta, useUniformityTest
+  hooks/                  useGame, useDraws, useArchive, usePageMeta, useUniformityTest, useIdle,
+                          useMediaQuery, useInView
   i18n/                   provider (Intl.PluralRules, lazy EN/DE), generated dictionaries
   lib/                    maths and data: odds, ev, popularity, rng, generator, ticketCheck,
-                          ticketStatus, stats, drawCalendar, eras, csvImport, games, archive
+                          ticketStatus, stats, drawCalendar, eras, csvImport, games, archive;
+                          screen logic: ticketSummary, ticketDraft, drawsView, statsView, userDrawOps
   lib/storage/            localStore (useSyncExternalStore), stores, validate, gameStore
   workers/stats.worker.ts Monte Carlo uniformity test off the main thread
 scripts/                  data, icons, i18n, contrast
@@ -78,7 +84,11 @@ additive classes rather than overriding existing ones.
 - `useDraws(game): DrawSet` — archive + user-added draws (`llg.userDraws.v1`), `byDate`,
   `pastWinning`, `completeness`, `meta` (source, licence, `payout` share for EuroJackpot),
   `isLoading`, `isError`, `refetch`.
-- `useArchive(game)` — the small cache behind it (1 h fresh, 1 retry, de-duplicated requests).
+- `useArchive(game, enabled = true)` — the small cache behind it (1 h fresh, 1 retry, de-duplicated
+  requests). `useDraws(game, false)` / `useArchive(game, false)` read the cache without fetching.
+- The app shell loads the archive for the tickets badge only after `useIdle()` and only when there
+  are tickets of the game or the sidebar is visible, so /odds and /about never wait for it.
+- `useIdle()`, `useMediaQuery(query)`, `useInView(ref)` — small helpers for deferred work.
 - `usePageMeta(page, params?)` — title, description and `<html lang>` from `seo.{page}.*`.
 - `useI18n()` — `t`, `tp` (plural), `num`, `money`, `percent`, `date`, `weekday`, `lang`, `setLang`.
 - `useUniformityTest(observed, draws, k, pool)` — Monte Carlo p-value in a Web Worker.
