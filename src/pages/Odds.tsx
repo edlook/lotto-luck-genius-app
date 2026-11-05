@@ -38,17 +38,29 @@ function ClassTable({ game }: { game: GameId }) {
     <table className="w-full text-caption sm:text-body" aria-label={t("odds.table.aria")}>
       <thead>
         <tr className="border-b border-border text-left align-bottom text-muted-foreground">
-          <th scope="col" className="py-2 pr-2 font-semibold">{t("common.class")}</th>
-          <th scope="col" className="py-2 pr-2 font-semibold">{t("odds.table.matches")}</th>
-          <th scope="col" className="hidden py-2 pr-2 text-right font-semibold sm:table-cell">{t("odds.table.combinations")}</th>
-          <th scope="col" className="py-2 pr-2 text-right font-semibold">{t("odds.table.oneIn")}</th>
-          <th scope="col" className="hidden py-2 text-right font-semibold sm:table-cell">{t("odds.table.probability")}</th>
+          <th scope="col" className="py-2 pr-2 font-semibold">
+            {t("common.class")}
+          </th>
+          <th scope="col" className="py-2 pr-2 font-semibold">
+            {t("odds.table.matches")}
+          </th>
+          <th scope="col" className="hidden py-2 pr-2 text-right font-semibold sm:table-cell">
+            {t("odds.table.combinations")}
+          </th>
+          <th scope="col" className="py-2 pr-2 text-right font-semibold">
+            {t("odds.table.oneIn")}
+          </th>
+          <th scope="col" className="hidden py-2 text-right font-semibold sm:table-cell">
+            {t("odds.table.probability")}
+          </th>
         </tr>
       </thead>
       <tbody className="divide-y divide-border">
         {rows.map((r) => (
           <tr key={r.cls}>
-            <th scope="row" className="py-2 pr-2 text-left font-semibold tabular-nums">{r.cls}</th>
+            <th scope="row" className="py-2 pr-2 text-left font-semibold tabular-nums">
+              {r.cls}
+            </th>
             <td className="py-2 pr-2 whitespace-nowrap tabular-nums">{matches(r.main, r.extra)}</td>
             <td className="hidden py-2 pr-2 text-right tabular-nums sm:table-cell">{num(r.combinations)}</td>
             <td className="py-2 pr-2 text-right tabular-nums">{oneIn(r.oneIn)}</td>
@@ -58,7 +70,9 @@ function ClassTable({ game }: { game: GameId }) {
       </tbody>
       <tfoot>
         <tr className="border-t-2 border-border-strong font-semibold">
-          <th scope="row" colSpan={2} className="py-2 pr-2 text-left">{t("odds.table.anyWin")}</th>
+          <th scope="row" colSpan={2} className="py-2 pr-2 text-left">
+            {t("odds.table.anyWin")}
+          </th>
           <td className="hidden py-2 pr-2 text-right tabular-nums sm:table-cell">{num(any.combinations)}</td>
           <td className="py-2 pr-2 text-right tabular-nums">{oneIn(any.oneIn)}</td>
           <td className="hidden py-2 text-right tabular-nums sm:table-cell">{percent(any.probability, 2)}</td>
@@ -88,7 +102,8 @@ function Calculators({ game }: { game: GameId }) {
   const archive = useArchive("ej", game === "ej" && userShare === undefined);
   const payout = game === "ej" ? (archive.data?.meta.payout ?? null) : null;
   const waitingForDefault = game === "ej" && userShare === undefined && !payout && archive.isLoading;
-  const defaultShare = game === "649" ? (cfg.payoutShare ?? 0.5) * 100 : payout ? Math.round(payout.share * 10_000) / 100 : null;
+  const defaultShare =
+    game === "649" ? (cfg.payoutShare ?? 0.5) * 100 : payout ? Math.round(payout.share * 10_000) / 100 : null;
 
   const price = settings.price?.[game] ?? cfg.price;
   const share = userShare !== undefined ? userShare : defaultShare;
@@ -171,7 +186,9 @@ function Calculators({ game }: { game: GameId }) {
                 {fee > 0 && ev.expectedReturnAfterFee !== null ? (
                   <p className="text-body">
                     {t("odds.ev.result.withFee", { value: money(ev.expectedReturnAfterFee) })}{" "}
-                    <span className="text-muted-foreground">({t("odds.ev.perField", { value: money(feePerField) })})</span>
+                    <span className="text-muted-foreground">
+                      ({t("odds.ev.perField", { value: money(feePerField) })})
+                    </span>
                   </p>
                 ) : null}
               </>
@@ -207,7 +224,10 @@ function Calculators({ game }: { game: GameId }) {
       <Section title={t("odds.year.title")} card>
         <div className="flex flex-col gap-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label={t("odds.year.fieldsPerDraw")} error={year.fieldsPerDraw < 1 ? t("odds.year.error.range") : undefined}>
+            <Field
+              label={t("odds.year.fieldsPerDraw")}
+              error={year.fieldsPerDraw < 1 ? t("odds.year.error.range") : undefined}
+            >
               <NumberInput
                 value={year.fieldsPerDraw}
                 onChange={(v) => v !== null && v >= 1 && setYear({ fieldsPerDraw: v })}
@@ -249,7 +269,11 @@ function Calculators({ game }: { game: GameId }) {
             {t("odds.year.price")}: {money(price)} · {t("odds.year.fee")}: {money(fee)}
           </p>
           <dl aria-live="polite" className="grid gap-2 sm:grid-cols-2">
-            <Result label={t("odds.year.result.spent")} value={money(y.spent)} note={tp("odds.year.result.fields", y.fields)} />
+            <Result
+              label={t("odds.year.result.spent")}
+              value={money(y.spent)}
+              note={tp("odds.year.result.fields", y.fields)}
+            />
             {y.expectedReturn !== null && y.expectedLoss !== null ? (
               <>
                 <Result label={t("odds.year.result.return")} value={money(y.expectedReturn)} />
@@ -304,7 +328,10 @@ export default function Odds() {
 
         <Section title={t("odds.example.title")} card>
           <p className="text-body">{t("odds.example.body")}</p>
-          <Link to="/about#odds" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+          <Link
+            to="/about#odds"
+            className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+          >
             {t("odds.source.link")}
           </Link>
         </Section>

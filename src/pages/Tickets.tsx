@@ -308,7 +308,12 @@ export default function Tickets() {
         onCancel={() => setToDelete(null)}
       />
 
-      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("tickets.menu.aria")} closeLabel={t("common.close")}>
+      <Sheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title={t("tickets.menu.aria")}
+        closeLabel={t("common.close")}
+      >
         <div className="flex flex-col gap-2">
           <Button
             variant="secondary"

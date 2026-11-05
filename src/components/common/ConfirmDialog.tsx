@@ -15,7 +15,16 @@ export interface ConfirmDialogProps {
 }
 
 /** Destructive confirmation. "Cancel" comes first and is the safe default in tab order. */
-export function ConfirmDialog({ open, title, description, confirmLabel, onConfirm, onCancel, extra, children }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  title,
+  description,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+  extra,
+  children,
+}: ConfirmDialogProps) {
   const { t } = useI18n();
   return (
     <Dialog

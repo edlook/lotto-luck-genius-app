@@ -19,11 +19,7 @@ export function Disclosure({ summary, children, defaultOpen, className, tone = "
   return (
     <details
       open={defaultOpen}
-      className={cx(
-        "group",
-        tone === "card" && "rounded-lg border border-border bg-card",
-        className,
-      )}
+      className={cx("group", tone === "card" && "rounded-lg border border-border bg-card", className)}
     >
       <summary
         className={cx(

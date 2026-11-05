@@ -13,8 +13,23 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useUniformityTest } from "@/hooks/useUniformityTest";
 import { GAMES } from "@/lib/games";
 import { CURRENT_EJ_ERA, EJ_ERAS } from "@/lib/eras";
-import { bucketize, evenCountDistribution, frequencies, lastDigitExpected, sumDistribution, typicalBand } from "@/lib/stats";
-import { STATS_PERIODS, drawsInEra, evenCountObserved, lastDigitObserved, selectPeriod, sumObserved, type StatsPeriod } from "@/lib/statsView";
+import {
+  bucketize,
+  evenCountDistribution,
+  frequencies,
+  lastDigitExpected,
+  sumDistribution,
+  typicalBand,
+} from "@/lib/stats";
+import {
+  STATS_PERIODS,
+  drawsInEra,
+  evenCountObserved,
+  lastDigitObserved,
+  selectPeriod,
+  sumObserved,
+  type StatsPeriod,
+} from "@/lib/statsView";
 
 /** p below this is reported as "larger than chance usually produces". */
 const P_ALERT = 0.01;
@@ -60,7 +75,11 @@ function UniformityBlock({ observed, draws, k, pool }: { observed: number[]; dra
       </div>
       {test.result ? (
         <p className="text-caption text-muted-foreground tabular-nums">
-          {t("stats.result.statistic", { value: num(test.result.statistic, { maximumFractionDigits: 1 }), n: num(draws), sims: num(test.result.sims) })}
+          {t("stats.result.statistic", {
+            value: num(test.result.statistic, { maximumFractionDigits: 1 }),
+            n: num(draws),
+            sims: num(test.result.sims),
+          })}
         </p>
       ) : null}
       <p className="text-caption text-muted-foreground">{t("stats.result.explainP")}</p>
@@ -88,7 +107,12 @@ export default function Stats() {
   const inPeriod = useMemo(() => selectPeriod(data.draws, period), [data.draws, period]);
   const n = inPeriod.length;
   const mainRows = useMemo(
-    () => frequencies(inPeriod.map((d) => ({ date: d.date, numbers: d.main })), cfg.mainCount, cfg.mainPool),
+    () =>
+      frequencies(
+        inPeriod.map((d) => ({ date: d.date, numbers: d.main })),
+        cfg.mainCount,
+        cfg.mainPool,
+      ),
     [inPeriod, cfg],
   );
   const observed = useMemo(() => mainRows.map((r) => r.observed), [mainRows]);
@@ -96,12 +120,23 @@ export default function Stats() {
   const era = EJ_ERAS.find((e) => e.id === eraId) ?? CURRENT_EJ_ERA;
   const euroDraws = useMemo(() => (game === "ej" ? drawsInEra(inPeriod, era.id) : []), [game, inPeriod, era.id]);
   const euroRows = useMemo(
-    () => frequencies(euroDraws.map((d) => ({ date: d.date, numbers: d.euro ?? [] })), 2, era.euroPool),
+    () =>
+      frequencies(
+        euroDraws.map((d) => ({ date: d.date, numbers: d.euro ?? [] })),
+        2,
+        era.euroPool,
+      ),
     [euroDraws, era.euroPool],
   );
   const szDraws = useMemo(() => (game === "649" ? inPeriod.filter((d) => d.superzahl != null) : []), [game, inPeriod]);
   const szRows = useMemo(
-    () => frequencies(szDraws.map((d) => ({ date: d.date, numbers: [d.superzahl as number] })), 1, 10, true),
+    () =>
+      frequencies(
+        szDraws.map((d) => ({ date: d.date, numbers: [d.superzahl as number] })),
+        1,
+        10,
+        true,
+      ),
     [szDraws],
   );
 
@@ -114,7 +149,11 @@ export default function Stats() {
     const digits = lastDigitExpected(cfg.mainPool);
     const digitsObs = lastDigitObserved(inPeriod);
     return {
-      even: even.map((p, e) => ({ label: t("stats.dist.oddEven.row", { even: e, odd: k - e }), observed: evenObs[e] ?? 0, theoretical: p })),
+      even: even.map((p, e) => ({
+        label: t("stats.dist.oddEven.row", { even: e, odd: k - e }),
+        observed: evenObs[e] ?? 0,
+        theoretical: p,
+      })),
       sum: buckets.map((b, i) => ({ label: `${b.from}–${b.to}`, observed: sumObs[i] ?? 0, theoretical: b.p })),
       digits: digits.map((p, d) => ({ label: String(d), observed: digitsObs[d] ?? 0, theoretical: p })),
     };
@@ -133,7 +172,12 @@ export default function Stats() {
     );
   } else if (data.draws.length === 0) {
     body = data.isError ? (
-      <ErrorState title={t("error.network.title")} body={t("error.network.body")} retryLabel={t("common.retry")} onRetry={data.refetch} />
+      <ErrorState
+        title={t("error.network.title")}
+        body={t("error.network.body")}
+        retryLabel={t("common.retry")}
+        onRetry={data.refetch}
+      />
     ) : (
       <EmptyState
         icon={<ChartColumn />}
@@ -149,7 +193,12 @@ export default function Stats() {
           <label htmlFor={periodId} className="text-body font-semibold">
             {t("stats.period.label")}
           </label>
-          <select id={periodId} value={period} onChange={(e) => setPeriod(e.target.value as StatsPeriod)} className={selectClass}>
+          <select
+            id={periodId}
+            value={period}
+            onChange={(e) => setPeriod(e.target.value as StatsPeriod)}
+            className={selectClass}
+          >
             {STATS_PERIODS.map((p) => (
               <option key={p} value={p}>
                 {t(`stats.period.${p}`)}
@@ -174,7 +223,12 @@ export default function Stats() {
               <label htmlFor={eraSelectId} className="text-body font-semibold">
                 {t("stats.period.era")}
               </label>
-              <select id={eraSelectId} value={eraId} onChange={(e) => setEraId(Number(e.target.value))} className={selectClass}>
+              <select
+                id={eraSelectId}
+                value={eraId}
+                onChange={(e) => setEraId(Number(e.target.value))}
+                className={selectClass}
+              >
                 {[...EJ_ERAS].reverse().map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.to
@@ -206,7 +260,11 @@ export default function Stats() {
             <div className="flex flex-col gap-6">
               <CompareTable caption={t("stats.dist.oddEven")} rows={dist.even} labelHeader={t("stats.dist.oddEven")} />
               <CompareTable caption={t("stats.dist.sum")} rows={dist.sum} labelHeader={t("stats.dist.sum")} />
-              <CompareTable caption={t("stats.dist.lastDigit")} rows={dist.digits} labelHeader={t("stats.dist.lastDigit")} />
+              <CompareTable
+                caption={t("stats.dist.lastDigit")}
+                rows={dist.digits}
+                labelHeader={t("stats.dist.lastDigit")}
+              />
             </div>
           </Section>
         ) : null}

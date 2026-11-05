@@ -93,11 +93,7 @@ export function NumberPicker({
     onChange(parsed.numbers);
   };
 
-  const message =
-    textError ??
-    (overflow ? t("evaluate.error.tooMany", { required }) : null) ??
-    error ??
-    null;
+  const message = textError ?? (overflow ? t("evaluate.error.tooMany", { required }) : null) ?? error ?? null;
   const counterId = `${id}-count`;
   const errorId = `${id}-err`;
   const textId = `${id}-text`;

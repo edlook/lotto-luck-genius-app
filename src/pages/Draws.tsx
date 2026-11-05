@@ -1,7 +1,18 @@
 import { Fragment, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { CalendarDays, ChevronRight, Search, Ticket as TicketIcon } from "lucide-react";
-import { BallRow, Button, ButtonLink, Card, EmptyState, ErrorState, Field, Section, Skeleton, SkeletonGroup } from "@/components/ui";
+import {
+  BallRow,
+  Button,
+  ButtonLink,
+  Card,
+  EmptyState,
+  ErrorState,
+  Field,
+  Section,
+  Skeleton,
+  SkeletonGroup,
+} from "@/components/ui";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DrawDataStatus } from "@/components/common/DrawDataStatus";
 import { focusLater } from "@/components/common/focus";
@@ -87,7 +98,11 @@ export default function Draws() {
             body={t("error.network.body")}
             retryLabel={t("common.retry")}
             onRetry={data.refetch}
-            actions={<ButtonLink to="/settings#import" variant="ghost">{t("draws.empty.cta")}</ButtonLink>}
+            actions={
+              <ButtonLink to="/settings#import" variant="ghost">
+                {t("draws.empty.cta")}
+              </ButtonLink>
+            }
           />
         ) : (
           <EmptyState

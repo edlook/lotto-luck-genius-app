@@ -1,5 +1,13 @@
 import { Link, useParams } from "react-router";
-import { CalendarClock, CalendarDays, CalendarX, ChevronLeft, ChevronRight, ExternalLink, Ticket as TicketIcon } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarDays,
+  CalendarX,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Ticket as TicketIcon,
+} from "lucide-react";
 import { BallRow, ButtonLink, Card, EmptyState, ErrorState, Section, Skeleton, SkeletonGroup } from "@/components/ui";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TicketCard } from "@/components/tickets/TicketCard";
@@ -39,32 +47,44 @@ function Quotes({ draw }: { draw: Draw }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="overflow-x-auto" role="region" tabIndex={0} aria-label={t("draws.detail.quotes.title")}>
-      <table className="w-full min-w-72 text-caption sm:text-body">
-        <thead>
-          <tr className="border-b border-border text-left text-muted-foreground">
-            <th scope="col" className="py-2 pr-2 font-semibold">{t("common.class")}</th>
-            <th scope="col" className="py-2 pr-2 font-semibold">{t("common.matches")}</th>
-            <th scope="col" className="py-2 pr-2 text-right font-semibold">{t("draws.detail.quotes.winners")}</th>
-            <th scope="col" className="py-2 text-right font-semibold">{t("draws.detail.quotes.amount")}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {quotes.map(([label, winners, amount], i) => (
-            <tr key={label}>
-              <th scope="row" className="py-2 pr-2 text-left font-semibold tabular-nums">{i + 1}</th>
-              <td className="py-2 pr-2 tabular-nums">{label.replace("+", " + ")}</td>
-              <td className="py-2 pr-2 text-right tabular-nums">{num(winners)}</td>
-              <td className="py-2 text-right tabular-nums">
-                {winners === 0 ? t("draws.detail.quotes.unclaimed") : money(amount)}
-              </td>
+        <table className="w-full min-w-72 text-caption sm:text-body">
+          <thead>
+            <tr className="border-b border-border text-left text-muted-foreground">
+              <th scope="col" className="py-2 pr-2 font-semibold">
+                {t("common.class")}
+              </th>
+              <th scope="col" className="py-2 pr-2 font-semibold">
+                {t("common.matches")}
+              </th>
+              <th scope="col" className="py-2 pr-2 text-right font-semibold">
+                {t("draws.detail.quotes.winners")}
+              </th>
+              <th scope="col" className="py-2 text-right font-semibold">
+                {t("draws.detail.quotes.amount")}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {quotes.map(([label, winners, amount], i) => (
+              <tr key={label}>
+                <th scope="row" className="py-2 pr-2 text-left font-semibold tabular-nums">
+                  {i + 1}
+                </th>
+                <td className="py-2 pr-2 tabular-nums">{label.replace("+", " + ")}</td>
+                <td className="py-2 pr-2 text-right tabular-nums">{num(winners)}</td>
+                <td className="py-2 text-right tabular-nums">
+                  {winners === 0 ? t("draws.detail.quotes.unclaimed") : money(amount)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       {jackpotOpen ? (
         <p className="text-caption text-muted-foreground">
-          {t("draws.detail.quotes.jackpot", { amount: money(draw.jackpot ?? 0) })}
+          {t("draws.detail.quotes.jackpot", {
+            amount: money(draw.jackpot ?? 0),
+          })}
         </p>
       ) : null}
     </div>
@@ -121,7 +141,10 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
         </p>
       )}
       {mine.length ? (
-        <Link to="/tickets" className="inline-flex min-h-11 items-center self-start font-semibold underline underline-offset-4">
+        <Link
+          to="/tickets"
+          className="inline-flex min-h-11 items-center self-start font-semibold underline underline-offset-4"
+        >
           {t("nav.tickets")}
         </Link>
       ) : null}
@@ -185,7 +208,11 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
         <EmptyState
           icon={<CalendarClock />}
           title={t("draws.detail.future", { date: date(iso) })}
-          actions={<ButtonLink to="/draws" variant="secondary">{t("nav.draws")}</ButtonLink>}
+          actions={
+            <ButtonLink to="/draws" variant="secondary">
+              {t("nav.draws")}
+            </ButtonLink>
+          }
         />
       );
       break;
@@ -193,8 +220,15 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
       state = (
         <EmptyState
           icon={<CalendarX />}
-          title={t("draws.detail.beforeStart", { game: gameName, date: date(kind.start) })}
-          actions={<ButtonLink to="/draws" variant="secondary">{t("nav.draws")}</ButtonLink>}
+          title={t("draws.detail.beforeStart", {
+            game: gameName,
+            date: date(kind.start),
+          })}
+          actions={
+            <ButtonLink to="/draws" variant="secondary">
+              {t("nav.draws")}
+            </ButtonLink>
+          }
         />
       );
       break;
@@ -202,7 +236,9 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
       state = (
         <EmptyState
           icon={<CalendarX />}
-          title={t("draws.noDrawDay", { dates: kind.nearest.map((x) => date(x)).join(", ") || "—" })}
+          title={t("draws.noDrawDay", {
+            dates: kind.nearest.map((x) => date(x)).join(", ") || "—",
+          })}
           actions={kind.nearest.map((x) => (
             <ButtonLink key={x} to={`/draws/${game}/${x}`} variant="secondary">
               {date(x)}
@@ -216,7 +252,11 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
         <EmptyState
           icon={<CalendarX />}
           title={t("draws.detail.noSuchDraw")}
-          actions={<ButtonLink to="/draws" variant="secondary">{t("nav.draws")}</ButtonLink>}
+          actions={
+            <ButtonLink to="/draws" variant="secondary">
+              {t("nav.draws")}
+            </ButtonLink>
+          }
         />
       );
       break;

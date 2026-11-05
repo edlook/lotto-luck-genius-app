@@ -59,7 +59,8 @@ export function validateDraft(draft: TicketDraft, formatDate: (iso: string) => s
   const errors: DraftErrors = { field: {} };
   if (draft.fields.length === 0) errors.fields = { key: "tickets.drawer.error.fields" };
   draft.fields.forEach((f, i) => {
-    if (!isFieldComplete(draft.game, f)) errors.field[i] = { key: "tickets.drawer.error.fieldIncomplete", params: { n: i + 1 } };
+    if (!isFieldComplete(draft.game, f))
+      errors.field[i] = { key: "tickets.drawer.error.fieldIncomplete", params: { n: i + 1 } };
   });
   if (draft.mode !== "next") {
     if (!isValidIsoDate(draft.date)) errors.date = { key: "tickets.drawer.error.date" };

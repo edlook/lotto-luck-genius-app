@@ -61,13 +61,7 @@ export function SaveTicketPanel({ game, fields, source, label, variant = "second
           <CircleCheck aria-hidden="true" className="size-5 shrink-0" />
           {t("generator.toast.saved", { date: date(saved.date) })}
         </p>
-        <ButtonLink
-          to={`/tickets#${ticketCardId(saved.id)}`}
-          variant={variant}
-          size="lg"
-          block
-          icon={<TicketIcon />}
-        >
+        <ButtonLink to={`/tickets#${ticketCardId(saved.id)}`} variant={variant} size="lg" block icon={<TicketIcon />}>
           {t("generator.saved.open")}
         </ButtonLink>
       </div>
@@ -77,7 +71,11 @@ export function SaveTicketPanel({ game, fields, source, label, variant = "second
   return (
     <div className="flex flex-col gap-4">
       {cfg.hasSuperzahl ? (
-        <Field label={t("tickets.drawer.sz.label")} help={t("generator.save.sz.help")} optionalText={t("common.optional")}>
+        <Field
+          label={t("tickets.drawer.sz.label")}
+          help={t("generator.save.sz.help")}
+          optionalText={t("common.optional")}
+        >
           <NumberInput value={sz} onChange={setSz} min={0} max={9} className="max-w-28" locale={locale} />
         </Field>
       ) : null}

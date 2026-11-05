@@ -31,7 +31,11 @@ export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProp
   return (
     <div className="flex flex-col gap-3">
       <figure className="flex flex-col gap-2">
-        <div role="img" aria-label={t("stats.chart.aria")} className="relative h-40 border-b border-border-strong sm:h-48">
+        <div
+          role="img"
+          aria-label={t("stats.chart.aria")}
+          className="relative h-40 border-b border-border-strong sm:h-48"
+        >
           <div
             aria-hidden="true"
             className="absolute inset-x-0 bg-secondary/25"
@@ -47,7 +51,11 @@ export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProp
               />
             ))}
           </div>
-          <div aria-hidden="true" className="absolute inset-x-0 border-t-2 border-dashed border-foreground/80" style={{ bottom: pct(expected) }} />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 border-t-2 border-dashed border-foreground/80"
+            style={{ bottom: pct(expected) }}
+          />
         </div>
         <div aria-hidden="true" className="relative h-4 text-caption text-muted-foreground tabular-nums">
           {rows.map((r, i) =>
@@ -100,16 +108,26 @@ export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProp
           <table className="w-full text-caption text-foreground sm:text-body">
             <thead>
               <tr className="border-b border-border text-left text-muted-foreground">
-                <th scope="col" className="py-1.5 pr-2 font-semibold">{t("stats.table.number")}</th>
-                <th scope="col" className="py-1.5 pr-2 text-right font-semibold">{t("stats.table.observed")}</th>
-                <th scope="col" className="py-1.5 pr-2 text-right font-semibold">{t("stats.table.difference")}</th>
-                <th scope="col" className="py-1.5 text-right font-semibold">{t("stats.table.lastDrawn")}</th>
+                <th scope="col" className="py-1.5 pr-2 font-semibold">
+                  {t("stats.table.number")}
+                </th>
+                <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
+                  {t("stats.table.observed")}
+                </th>
+                <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
+                  {t("stats.table.difference")}
+                </th>
+                <th scope="col" className="py-1.5 text-right font-semibold">
+                  {t("stats.table.lastDrawn")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {sorted.map((r) => (
                 <tr key={r.number}>
-                  <th scope="row" className="py-1.5 pr-2 text-left font-semibold tabular-nums">{r.number}</th>
+                  <th scope="row" className="py-1.5 pr-2 text-left font-semibold tabular-nums">
+                    {r.number}
+                  </th>
                   <td className="py-1.5 pr-2 text-right tabular-nums">{r.observed}</td>
                   <td className="py-1.5 pr-2 text-right tabular-nums">
                     {r.difference > 0 ? "+" : ""}
@@ -133,7 +151,15 @@ export interface CompareRow {
 }
 
 /** Observed vs exact theoretical shares as paired bars inside a real table. */
-export function CompareTable({ caption, rows, labelHeader }: { caption: string; rows: CompareRow[]; labelHeader: string }) {
+export function CompareTable({
+  caption,
+  rows,
+  labelHeader,
+}: {
+  caption: string;
+  rows: CompareRow[];
+  labelHeader: string;
+}) {
   const { t, percent } = useI18n();
   const max = Math.max(0.0001, ...rows.flatMap((r) => [r.observed, r.theoretical]));
   return (
@@ -157,7 +183,10 @@ export function CompareTable({ caption, rows, labelHeader }: { caption: string; 
           </th>
           <th scope="col" className="py-1.5 font-semibold">
             <span className="inline-flex items-baseline gap-1.5">
-              <span aria-hidden="true" className="inline-block size-2.5 shrink-0 rounded-sm border border-foreground/70" />
+              <span
+                aria-hidden="true"
+                className="inline-block size-2.5 shrink-0 rounded-sm border border-foreground/70"
+              />
               {t("stats.dist.theoretical")}
             </span>
           </th>
@@ -166,14 +195,24 @@ export function CompareTable({ caption, rows, labelHeader }: { caption: string; 
       <tbody className="divide-y divide-border">
         {rows.map((r) => (
           <tr key={r.label}>
-            <th scope="row" className="py-1.5 pr-2 text-left font-semibold tabular-nums">{r.label}</th>
+            <th scope="row" className="py-1.5 pr-2 text-left font-semibold tabular-nums">
+              {r.label}
+            </th>
             <td className="py-1.5 pr-2">
               <span className="block tabular-nums">{percent(r.observed, 1)}</span>
-              <span aria-hidden="true" className="block h-1.5 rounded-full bg-primary" style={{ width: `${(r.observed / max) * 100}%` }} />
+              <span
+                aria-hidden="true"
+                className="block h-1.5 rounded-full bg-primary"
+                style={{ width: `${(r.observed / max) * 100}%` }}
+              />
             </td>
             <td className="py-1.5">
               <span className="block tabular-nums">{percent(r.theoretical, 1)}</span>
-              <span aria-hidden="true" className="block h-1.5 rounded-full border border-foreground/70" style={{ width: `${(r.theoretical / max) * 100}%` }} />
+              <span
+                aria-hidden="true"
+                className="block h-1.5 rounded-full border border-foreground/70"
+                style={{ width: `${(r.theoretical / max) * 100}%` }}
+              />
             </td>
           </tr>
         ))}

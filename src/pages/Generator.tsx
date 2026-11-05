@@ -1,7 +1,18 @@
 import { useId, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import { Copy, Dices, Eraser, RefreshCw, SearchCheck } from "lucide-react";
-import { Ball, BallRow, Button, Card, EmptyState, Field, NumberInput, SegmentedControl, Tabs, toast } from "@/components/ui";
+import {
+  Ball,
+  BallRow,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  NumberInput,
+  SegmentedControl,
+  Tabs,
+  toast,
+} from "@/components/ui";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { HonestyNote } from "@/components/common/HonestyNote";
 import { Disclosure } from "@/components/common/Disclosure";
@@ -52,7 +63,9 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
   const generate = () => {
     const n = Math.min(MAX_FIELDS, Math.max(1, count ?? 1));
     try {
-      const fields = generateFields(game, n, { mode, pastWinning }).map(({ main, euro }) => (euro ? { main, euro } : { main }));
+      const fields = generateFields(game, n, { mode, pastWinning }).map(({ main, euro }) =>
+        euro ? { main, euro } : { main },
+      );
       store(fields);
       // Bring the result into view without taking focus away from the button ("generate again").
       window.requestAnimationFrame(() =>
@@ -71,7 +84,9 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
     if (!current) return;
     try {
       const f = generateField(game, { mode, pastWinning });
-      const fields = current.fields.map((old, j) => (j === i ? (f.euro ? { main: f.main, euro: f.euro } : { main: f.main }) : old));
+      const fields = current.fields.map((old, j) =>
+        j === i ? (f.euro ? { main: f.main, euro: f.euro } : { main: f.main }) : old,
+      );
       store(fields);
       toast(t("generator.toast.replaced", { n: i + 1 }));
     } catch (e) {
@@ -154,11 +169,7 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
               {current.fields.map((f, i) => {
                 const report = reports[i];
                 return (
-                  <li
-                    key={`${current.run}-${i}`}
-                    className="llg-appear"
-                    style={{ ["--i" as string]: Math.min(i, 8) }}
-                  >
+                  <li key={`${current.run}-${i}`} className="llg-appear" style={{ ["--i" as string]: Math.min(i, 8) }}>
                     <Card className="flex flex-col gap-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h3 className="text-body font-bold">{t("generator.result.field", { n: i + 1 })}</h3>
@@ -178,7 +189,11 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
                           variant="ghost"
                           icon={<Copy />}
                           onClick={() =>
-                            void copyText(fieldToText(f, euroLabel), t("generator.toast.copied"), t("generator.toast.copyFailed"))
+                            void copyText(
+                              fieldToText(f, euroLabel),
+                              t("generator.toast.copied"),
+                              t("generator.toast.copyFailed"),
+                            )
                           }
                         >
                           {t("generator.result.copyField")}
@@ -315,7 +330,9 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
           <BallRow main={main} {...(cfg.extraCount ? { euro } : {})} size="md" />
           <PopularityRules report={report} headingLevel={3} />
           <p className="text-caption text-muted-foreground">{t("evaluate.report.legend")}</p>
-          {cfg.extraCount ? <p className="text-caption text-muted-foreground">{t("generator.result.euroNote")}</p> : null}
+          {cfg.extraCount ? (
+            <p className="text-caption text-muted-foreground">{t("generator.result.euroNote")}</p>
+          ) : null}
           <HonestyNote>{t("honesty.short")}</HonestyNote>
           <SaveTicketPanel
             key={key}
@@ -347,8 +364,16 @@ export default function Generator() {
         value={tab}
         onChange={setTab}
         items={[
-          { id: "generate", label: t("generator.tab.generate"), panel: <GenerateTab game={game} pastWinning={data.pastWinning} /> },
-          { id: "evaluate", label: t("generator.tab.evaluate"), panel: <EvaluateTab game={game} pastWinning={data.pastWinning} /> },
+          {
+            id: "generate",
+            label: t("generator.tab.generate"),
+            panel: <GenerateTab game={game} pastWinning={data.pastWinning} />,
+          },
+          {
+            id: "evaluate",
+            label: t("generator.tab.evaluate"),
+            panel: <EvaluateTab game={game} pastWinning={data.pastWinning} />,
+          },
         ]}
       />
     </>

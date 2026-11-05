@@ -116,7 +116,9 @@ function EditorForm({
     }
     const saved = draftToTicket(
       draft,
-      ticket ? { id: ticket.id, createdAt: ticket.createdAt, source: ticket.source } : { id: newId(), createdAt: new Date().toISOString(), source: "manual" },
+      ticket
+        ? { id: ticket.id, createdAt: ticket.createdAt, source: ticket.source }
+        : { id: newId(), createdAt: new Date().toISOString(), source: "manual" },
       next,
     );
     const ok = writeTickets(
@@ -169,7 +171,10 @@ function EditorForm({
               key={i}
               data-invalid={fieldError ? "true" : undefined}
               tabIndex={fieldError ? -1 : undefined}
-              className={cx("flex flex-col gap-3 rounded-lg outline-offset-4", fieldError && "ring-1 ring-danger/60 ring-offset-8 ring-offset-surface-2")}
+              className={cx(
+                "flex flex-col gap-3 rounded-lg outline-offset-4",
+                fieldError && "ring-1 ring-danger/60 ring-offset-8 ring-offset-surface-2",
+              )}
             >
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-body font-bold">{t("tickets.card.field", { n: i + 1 })}</h3>
@@ -189,7 +194,9 @@ function EditorForm({
                 required={game.mainCount}
                 value={f.main}
                 onChange={(main) => setField(i, { main })}
-                error={fieldError && f.main.length !== game.mainCount ? t(fieldError.key, fieldError.params) : undefined}
+                error={
+                  fieldError && f.main.length !== game.mainCount ? t(fieldError.key, fieldError.params) : undefined
+                }
               />
               {game.extraCount ? (
                 <NumberPicker
@@ -200,14 +207,20 @@ function EditorForm({
                   onChange={(euro) => setField(i, { euro })}
                   columns={6}
                   tone="euro"
-                  error={fieldError && f.euro.length !== game.extraCount ? t(fieldError.key, fieldError.params) : undefined}
+                  error={
+                    fieldError && f.euro.length !== game.extraCount ? t(fieldError.key, fieldError.params) : undefined
+                  }
                 />
               ) : null}
             </div>
           );
         })}
         {draft.fields.length < MAX_TICKET_FIELDS ? (
-          <Button variant="secondary" icon={<Plus />} onClick={() => update({ fields: [...draft.fields, emptyField()] })}>
+          <Button
+            variant="secondary"
+            icon={<Plus />}
+            onClick={() => update({ fields: [...draft.fields, emptyField()] })}
+          >
             {t("tickets.drawer.addField")}
           </Button>
         ) : null}
@@ -230,11 +243,7 @@ function EditorForm({
             help={t("tickets.drawer.draws.help", { days: drawDaysText(draft.game, locale) })}
             required
           >
-            <DateInput
-              value={draft.date}
-              invalid={Boolean(errors?.date)}
-              onChange={(v) => update({ date: v })}
-            />
+            <DateInput value={draft.date} invalid={Boolean(errors?.date)} onChange={(v) => update({ date: v })} />
           </Field>
         ) : (
           <p className="text-caption text-muted-foreground">

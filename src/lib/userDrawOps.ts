@@ -44,7 +44,11 @@ export interface ManualDrawInput {
 }
 
 /** First problem of a manually entered draw (QA B1: future dates are rejected). */
-export function manualDrawError(input: ManualDrawInput, today: string, known: Map<string, Draw>): ManualDrawError | null {
+export function manualDrawError(
+  input: ManualDrawInput,
+  today: string,
+  known: Map<string, Draw>,
+): ManualDrawError | null {
   const err = drawDateError(input.game, input.date, today);
   if (err === "date") return { key: "settings.manual.error.date" };
   if (err === "future") return { key: "settings.manual.error.future", date: input.date };
@@ -61,6 +65,13 @@ export function manualDrawError(input: ManualDrawInput, today: string, known: Ma
 export function manualToDraw(input: ManualDrawInput): Draw {
   const main = [...input.main].sort((a, b) => a - b);
   return input.game === "ej"
-    ? { game: "ej", date: input.date, main, euro: [...input.euro].sort((a, b) => a - b), euroPool: euroPoolOn(input.date), source: "user" }
+    ? {
+        game: "ej",
+        date: input.date,
+        main,
+        euro: [...input.euro].sort((a, b) => a - b),
+        euroPool: euroPoolOn(input.date),
+        source: "user",
+      }
     : { game: "649", date: input.date, main, superzahl: input.superzahl, source: "user" };
 }

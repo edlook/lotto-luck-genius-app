@@ -28,20 +28,30 @@ export function DrawDataStatus({ data, showDetails = true }: { data: DrawSet; sh
           {completenessText(c, i18n)}
         </span>
         {showDetails ? (
-          <Link to="/about#data" className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4">
+          <Link
+            to="/about#data"
+            className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4"
+          >
             {t("draws.status.details")}
           </Link>
         ) : null}
       </p>
       {missing.length ? (
-        <div role="note" className="flex flex-col gap-2 rounded-md border border-warning/60 bg-warning/10 p-3 text-body">
+        <div
+          role="note"
+          className="flex flex-col gap-2 rounded-md border border-warning/60 bg-warning/10 p-3 text-body"
+        >
           <p className="flex items-start gap-2 font-semibold">
             <TriangleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-warning" />
             {tp("draws.banner.gap", missing.length)}
           </p>
           <p className="text-caption text-muted-foreground">
             {t("draws.banner.gap.list", {
-              dates: missing.slice(-12).map((d) => date(d)).join(", ") + (missing.length > 12 ? " …" : ""),
+              dates:
+                missing
+                  .slice(-12)
+                  .map((d) => date(d))
+                  .join(", ") + (missing.length > 12 ? " …" : ""),
             })}
           </p>
           <ButtonLink to="/settings#manual-draw" variant="secondary" className="self-start">

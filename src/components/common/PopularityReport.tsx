@@ -26,7 +26,11 @@ export function PopularityBadge({ level, className }: { level: PopularityLevel; 
   );
 }
 
-function ruleText(r: RuleResult, t: (k: string, p?: Record<string, string | number>) => string, date: (iso: string) => string) {
+function ruleText(
+  r: RuleResult,
+  t: (k: string, p?: Record<string, string | number>) => string,
+  date: (iso: string) => string,
+) {
   const params: Record<string, string | number> = { ...r.params };
   if (r.id === "pastWinning" && typeof params.date === "string") params.date = date(params.date);
   if (r.id === "ticketPattern" && typeof params.line === "string")
@@ -72,7 +76,13 @@ export function PopularityRules({ report, headingLevel = 3 }: { report: Report; 
                   {t(`popularity.rule.${r.id}.name`)}
                   <span className="font-normal text-muted-foreground">
                     {" · "}
-                    {t(hit ? "popularity.rule.triggered" : r.status === "notTriggered" ? "popularity.rule.notTriggered" : "common.notChecked")}
+                    {t(
+                      hit
+                        ? "popularity.rule.triggered"
+                        : r.status === "notTriggered"
+                          ? "popularity.rule.notTriggered"
+                          : "common.notChecked",
+                    )}
                     {" · "}
                     {t(`popularity.strength.${r.strength}`)}
                   </span>

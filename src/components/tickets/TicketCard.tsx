@@ -24,7 +24,6 @@ export interface TicketCardProps {
 
 const SHOWN_DRAWS = 3;
 
-
 /** Result line of one field in one checked draw, with the prize amount when known. */
 function FieldResult({ check, game }: { check: FieldCheck; game: Ticket["game"] }) {
   const { t, money } = useI18n();
@@ -76,12 +75,17 @@ function DrawResult({ r, ticket }: { r: TicketDrawResult; ticket: Ticket }) {
       <ul className="flex flex-col gap-1.5">
         {r.fields.map((f, i) => (
           <li key={i} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-body">
-            {multi ? <span className="text-caption text-muted-foreground">{t("tickets.card.field", { n: i + 1 })}:</span> : null}
+            {multi ? (
+              <span className="text-caption text-muted-foreground">{t("tickets.card.field", { n: i + 1 })}:</span>
+            ) : null}
             <FieldResult check={f} game={ticket.game} />
             {f.mainHits.length || f.euroHits.length ? (
               <span className="w-full text-caption text-muted-foreground">
                 {t("tickets.result.matchesLabel", {
-                  numbers: [f.mainHits.join(", "), f.euroHits.length ? `${t("ball.label.euro")} ${f.euroHits.join(", ")}` : ""]
+                  numbers: [
+                    f.mainHits.join(", "),
+                    f.euroHits.length ? `${t("ball.label.euro")} ${f.euroHits.join(", ")}` : "",
+                  ]
                     .filter(Boolean)
                     .join("; "),
                 })}
@@ -113,13 +117,19 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
   const title =
     onlyDate || dates.length === 1
       ? t("tickets.card.draw", { date: date(onlyDate ?? dates[0]!) })
-      : t("tickets.card.draws.range", { first: date(dates[0]!), last: date(dates[dates.length - 1]!), n: dates.length });
+      : t("tickets.card.draws.range", {
+          first: date(dates[0]!),
+          last: date(dates[dates.length - 1]!),
+          n: dates.length,
+        });
 
   const visible = showAll ? checked : checked.slice(0, SHOWN_DRAWS);
   const hidden = checked.length - visible.length;
   const szMissing = ticket.game === "649" && (ticket.superzahl === null || ticket.superzahl === undefined);
   const notLoaded = onlyDate ? ev.notLoaded.filter((d) => d === onlyDate) : ev.notLoaded;
-  const pending = onlyDate ? (ev.results.find((r) => r.date === onlyDate && r.state === "pending")?.date ?? null) : ev.nextPending;
+  const pending = onlyDate
+    ? (ev.results.find((r) => r.date === onlyDate && r.state === "pending")?.date ?? null)
+    : ev.nextPending;
 
   return (
     <Card
@@ -149,7 +159,9 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
           return (
             <li key={i} className="flex flex-col gap-1">
               {ticket.fields.length > 1 ? (
-                <span className="text-caption font-semibold text-muted-foreground">{t("tickets.card.field", { n: i + 1 })}</span>
+                <span className="text-caption font-semibold text-muted-foreground">
+                  {t("tickets.card.field", { n: i + 1 })}
+                </span>
               ) : null}
               <BallRow
                 main={f.main}
@@ -196,7 +208,12 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
               ))}
             </ul>
             {hidden > 0 || showAll ? (
-              <Button variant="ghost" className="self-start" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+              <Button
+                variant="ghost"
+                className="self-start"
+                onClick={() => setShowAll((v) => !v)}
+                aria-expanded={showAll}
+              >
                 {showAll ? t("common.showLess") : tp("tickets.card.moreDraws", hidden)}
               </Button>
             ) : null}

@@ -34,7 +34,11 @@ const TODAY = "2026-11-05";
 describe("ticket filters and summary", () => {
   const draws = byDate([d649("2026-11-04", [3, 13, 16, 28, 44, 49], 2), d649("2026-10-31", [1, 2, 3, 4, 5, 6], 0)]);
   const won = evaluateTicket(ticket(), draws, TODAY);
-  const lost = evaluateTicket(ticket({ id: "t2", fields: [{ main: [7, 8, 9, 10, 11, 12] }], drawDates: ["2026-10-31"] }), draws, TODAY);
+  const lost = evaluateTicket(
+    ticket({ id: "t2", fields: [{ main: [7, 8, 9, 10, 11, 12] }], drawDates: ["2026-10-31"] }),
+    draws,
+    TODAY,
+  );
   const pending = evaluateTicket(ticket({ id: "t3", drawDates: ["2026-11-07"] }), draws, TODAY);
   const series = evaluateTicket(ticket({ id: "t4", drawDates: ["2026-10-31", "2026-11-07"] }), draws, TODAY);
 
@@ -89,7 +93,12 @@ describe("ticket form", () => {
   });
 
   it("rejects a non-draw day for a single date", () => {
-    const d = { ...emptyDraft("ej"), fields: [{ main: [1, 2, 3, 4, 5], euro: [1, 2] }], mode: "date" as const, date: "2026-11-05" };
+    const d = {
+      ...emptyDraft("ej"),
+      fields: [{ main: [1, 2, 3, 4, 5], euro: [1, 2] }],
+      mode: "date" as const,
+      date: "2026-11-05",
+    };
     expect(validateDraft(d).date?.key).toBe("tickets.drawer.error.dateNotDrawDay");
     expect(hasErrors(validateDraft({ ...d, date: "2026-11-06" }))).toBe(false);
   });
@@ -134,7 +143,11 @@ describe("draw detail dates", () => {
   });
 
   it("finds neighbours by stored data", () => {
-    const list = [d649("2026-10-28", [1, 2, 3, 4, 5, 6]), d649("2026-10-31", [1, 2, 3, 4, 5, 6]), d649("2026-11-04", [1, 2, 3, 4, 5, 6])];
+    const list = [
+      d649("2026-10-28", [1, 2, 3, 4, 5, 6]),
+      d649("2026-10-31", [1, 2, 3, 4, 5, 6]),
+      d649("2026-11-04", [1, 2, 3, 4, 5, 6]),
+    ];
     expect(neighbours(list, "2026-10-31")).toEqual({ prev: "2026-10-28", next: "2026-11-04" });
     expect(neighbours(list, "2026-11-04")).toEqual({ prev: "2026-10-31", next: null });
     expect(neighbours(list, "2026-11-01")).toEqual({ prev: "2026-10-31", next: "2026-11-04" });
@@ -148,7 +161,11 @@ describe("draw detail dates", () => {
   });
 
   it("tickets for a date and per-date counts", () => {
-    const ts = [ticket(), ticket({ id: "b", drawDates: ["2026-11-04", "2026-11-07"] }), ticket({ id: "c", game: "ej" })];
+    const ts = [
+      ticket(),
+      ticket({ id: "b", drawDates: ["2026-11-04", "2026-11-07"] }),
+      ticket({ id: "c", game: "ej" }),
+    ];
     expect(ticketsForDate(ts, "649", "2026-11-04").map((t) => t.id)).toEqual(["t1", "b"]);
     expect(ticketDates(ts, "649").get("2026-11-04")).toBe(2);
   });
@@ -157,13 +174,20 @@ describe("draw detail dates", () => {
 describe("statistics views", () => {
   const draws = [d649("2026-01-03", [2, 4, 6, 8, 10, 11]), d649("2026-01-07", [1, 3, 5, 7, 9, 12])];
   it("periods take the tail", () => {
-    const many = Array.from({ length: 150 }, (_, i) => d649(`2026-01-${String((i % 28) + 1).padStart(2, "0")}`, [1, 2, 3, 4, 5, 6]));
+    const many = Array.from({ length: 150 }, (_, i) =>
+      d649(`2026-01-${String((i % 28) + 1).padStart(2, "0")}`, [1, 2, 3, 4, 5, 6]),
+    );
     expect(selectPeriod(many, "last100")).toHaveLength(100);
     expect(selectPeriod(many, "all")).toHaveLength(150);
   });
   it("even counts, sums and last digits", () => {
     expect(evenCountObserved(draws, 6)).toEqual([0, 0.5, 0, 0, 0, 0.5, 0]);
-    expect(sumObserved(draws, [{ from: 0, to: 40 }, { from: 41, to: 100 }])).toEqual([0.5, 0.5]);
+    expect(
+      sumObserved(draws, [
+        { from: 0, to: 40 },
+        { from: 41, to: 100 },
+      ]),
+    ).toEqual([0.5, 0.5]);
     const ld = lastDigitObserved(draws);
     expect(ld.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
     expect(ld[1]).toBeCloseTo(2 / 12, 12); // 11, 1
@@ -193,7 +217,9 @@ describe("adding draws in the browser", () => {
   });
   it("Euro numbers must fit the era of the date", () => {
     const ej = { game: "ej" as const, main: [1, 2, 3, 4, 5], euro: [1, 12], superzahl: null };
-    expect(manualDrawError({ ...ej, date: "2022-03-18" }, TODAY, new Map())?.key).toBe("settings.manual.error.incomplete");
+    expect(manualDrawError({ ...ej, date: "2022-03-18" }, TODAY, new Map())?.key).toBe(
+      "settings.manual.error.incomplete",
+    );
     expect(manualDrawError({ ...ej, date: "2026-11-03" }, TODAY, new Map())).toBeNull();
   });
   it("plans an import and stores draws without duplicates", () => {
@@ -202,6 +228,10 @@ describe("adding draws in the browser", () => {
     expect(plan).toMatchObject({ duplicates: 1 });
     expect(plan.fresh.map((d) => d.date)).toEqual(["2026-10-31"]);
     const stored = addUserDraws([], plan.fresh);
-    expect(addUserDraws(stored, [manualToDraw({ game: "649", date: "2026-10-31", main: [6, 5, 4, 3, 2, 1], euro: [], superzahl: 1 })])).toHaveLength(1);
+    expect(
+      addUserDraws(stored, [
+        manualToDraw({ game: "649", date: "2026-10-31", main: [6, 5, 4, 3, 2, 1], euro: [], superzahl: 1 }),
+      ]),
+    ).toHaveLength(1);
   });
 });

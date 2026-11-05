@@ -45,8 +45,7 @@ export function useTicketTransfer(): TicketTransfer {
 
   const apply = (p: PendingImport) => {
     const ok = writeTickets((prev) => mergeImportedTickets(prev, p.fresh, p.replace), t, exportAll);
-    if (ok)
-      toast.success(t("tickets.import.done", { added: p.fresh.length + p.replace.length, skipped: p.skipped }));
+    if (ok) toast.success(t("tickets.import.done", { added: p.fresh.length + p.replace.length, skipped: p.skipped }));
   };
 
   const onFile = async (file: File | undefined) => {

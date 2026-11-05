@@ -19,7 +19,9 @@ export function selectPeriod(draws: Draw[], period: StatsPeriod): Draw[] {
 export function drawsInEra(draws: Draw[], eraId: number): Draw[] {
   const era = EJ_ERAS.find((e) => e.id === eraId);
   if (!era) return [];
-  return draws.filter((d) => d.date >= era.from && (era.to === null || d.date <= era.to) && ejEraOn(d.date).id === eraId);
+  return draws.filter(
+    (d) => d.date >= era.from && (era.to === null || d.date <= era.to) && ejEraOn(d.date).id === eraId,
+  );
 }
 
 /** Observed share of draws with e even main numbers, e = 0..k. */
