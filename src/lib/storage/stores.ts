@@ -1,76 +1,33 @@
 /**
  * App data kept in this browser:
- * - tickets            llg.tickets.v1   (schema checked with zod)
+ * - tickets            llg.tickets.v1   (checked by ./validate.ts)
  * - user-added draws   llg.userDraws.v1 (manual entry / CSV import)
  * - default game       llg.game
  * - odds inputs        llg.odds.v1
  */
-import { z } from "zod";
-import { GAMES, type GameId } from "../games";
-import { berlinNow, drawDateError, isValidIsoDate } from "../drawCalendar";
+import { berlinNow, drawDateError } from "../drawCalendar";
 import { euroPoolOn } from "../eras";
 import type { Draw } from "../ticketCheck";
 import { createLocalStore } from "./localStore";
+import { parseOddsSettings, parseTicket, parseUserDraw, type OddsSettings, type Ticket, type UserDraw } from "./validate";
 
 /* ---------- tickets ---------- */
 
-const gameSchema = z.enum(["ej", "649"]);
-const isoDate = z.string().refine(isValidIsoDate, "ISO date");
-
-const fieldSchema = z.object({
-  main: z.array(z.number().int()),
-  euro: z.array(z.number().int()).optional(),
-});
-
-export const ticketSchema = z
-  .object({
-    id: z.string().min(1).max(64),
-    game: gameSchema,
-    fields: z.array(fieldSchema).min(1).max(24),
-    superzahl: z.number().int().min(0).max(9).nullable().optional(),
-    drawDates: z.array(isoDate).min(1).max(104),
-    createdAt: z.string(),
-    note: z.string().max(500).optional(),
-    source: z.enum(["generator", "manual"]),
-  })
-  .superRefine((t, ctx) => {
-    const g = GAMES[t.game];
-    t.fields.forEach((f, i) => {
-      const okMain =
-        f.main.length === g.mainCount &&
-        new Set(f.main).size === g.mainCount &&
-        f.main.every((n) => n >= 1 && n <= g.mainPool);
-      const euro = f.euro ?? [];
-      const okEuro =
-        g.extraCount === 0
-          ? euro.length === 0
-          : euro.length === g.extraCount && new Set(euro).size === g.extraCount && euro.every((n) => n >= 1 && n <= g.extraPool);
-      if (!okMain || !okEuro) ctx.addIssue({ code: "custom", message: `field ${i + 1}`, path: ["fields", i] });
-    });
-  });
-
-/* Explicit interfaces (instead of z.infer) keep the public types readable and stable. */
-export interface TicketField {
-  main: number[];
-  euro?: number[];
-}
-
-export interface Ticket {
-  id: string;
-  game: GameId;
-  fields: TicketField[];
-  superzahl?: number | null;
-  drawDates: string[];
-  createdAt: string;
-  note?: string;
-  source: "generator" | "manual";
-}
+export {
+  parseTicket,
+  parseUserDraw,
+  parseOddsSettings,
+  type Ticket,
+  type TicketField,
+  type UserDraw,
+  type OddsSettings,
+} from "./validate";
 
 const ticketsParse = (raw: unknown): Ticket[] => {
   if (!Array.isArray(raw)) return [];
   return raw.flatMap((t) => {
-    const r = ticketSchema.safeParse(t);
-    return r.success ? [r.data as Ticket] : [];
+    const r = parseTicket(t);
+    return r ? [r] : [];
   });
 };
 
@@ -123,8 +80,8 @@ export function analyzeTicketImport(text: string, existing: Ticket[]): ImportAna
   const valid: Ticket[] = [];
   let skipped = 0;
   for (const item of list) {
-    const r = ticketSchema.safeParse(item);
-    if (r.success) valid.push(r.data as Ticket);
+    const r = parseTicket(item);
+    if (r) valid.push(r);
     else skipped++;
   }
   if (!valid.length) return { valid: [], skipped, conflicts: [], fresh: [], error: "format" };
@@ -142,40 +99,13 @@ export function analyzeTicketImport(text: string, existing: Ticket[]): ImportAna
 
 /* ---------- user-added draws ---------- */
 
-const userDrawSchema = z
-  .object({
-    game: gameSchema,
-    date: isoDate,
-    main: z.array(z.number().int()),
-    euro: z.array(z.number().int()).optional(),
-    superzahl: z.number().int().min(0).max(9).nullable().optional(),
-    addedAt: z.string().optional(),
-  })
-  .superRefine((d, ctx) => {
-    const g = GAMES[d.game];
-    const pool = g.extraCount ? euroPoolOn(d.date) : 0;
-    const okMain = d.main.length === g.mainCount && new Set(d.main).size === g.mainCount && d.main.every((n) => n >= 1 && n <= g.mainPool);
-    const euro = d.euro ?? [];
-    const okEuro = g.extraCount === 0 ? euro.length === 0 : euro.length === 2 && new Set(euro).size === 2 && euro.every((n) => n >= 1 && n <= pool);
-    if (!okMain || !okEuro) ctx.addIssue({ code: "custom", message: "numbers" });
-  });
-
-export interface UserDraw {
-  game: GameId;
-  date: string;
-  main: number[];
-  euro?: number[];
-  superzahl?: number | null;
-  addedAt?: string;
-}
-
 export const userDrawsStore = createLocalStore<UserDraw[]>(
   "llg.userDraws.v1",
   (raw) =>
     Array.isArray(raw)
       ? raw.flatMap((d) => {
-          const r = userDrawSchema.safeParse(d);
-          return r.success ? [r.data as UserDraw] : [];
+          const r = parseUserDraw(d);
+          return r ? [r] : [];
         })
       : [],
   [],
@@ -204,27 +134,7 @@ export function drawToUserDraw(d: Draw): UserDraw {
 
 /* ---------- settings ---------- */
 
-// The game store lives in ./gameStore.ts (no zod, so the app shell stays small); re-exported for compatibility.
+// The game store lives in ./gameStore.ts; re-exported for compatibility.
 export { gameStore } from "./gameStore";
 
-const oddsSchema = z.object({
-  price: z.record(z.string(), z.number().nonnegative()).optional(),
-  share: z.record(z.string(), z.number().min(0).max(100).nullable()).optional(),
-  fee: z.record(z.string(), z.number().nonnegative()).optional(),
-  year: z
-    .object({
-      fieldsPerDraw: z.number().int().positive(),
-      drawsPerWeek: z.number().int().min(1).max(2),
-      weeks: z.number().int().positive().max(53),
-    })
-    .optional(),
-});
-
-export interface OddsSettings {
-  price?: Record<string, number>;
-  share?: Record<string, number | null>;
-  fee?: Record<string, number>;
-  year?: { fieldsPerDraw: number; drawsPerWeek: number; weeks: number };
-}
-
-export const oddsStore = createLocalStore<OddsSettings>("llg.odds.v1", (raw) => oddsSchema.parse(raw) as OddsSettings, {});
+export const oddsStore = createLocalStore<OddsSettings>("llg.odds.v1", parseOddsSettings, {});
