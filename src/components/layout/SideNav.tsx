@@ -16,7 +16,7 @@ function SideLink({ item, badge, badgeLabel }: { item: NavItem; badge?: number; 
       end={item.to === "/"}
       className={({ isActive }) =>
         cx(
-          "relative flex min-h-11 items-center gap-3 rounded-md px-3 font-semibold transition-colors duration-150 ease-out",
+          "relative flex min-h-11 items-center gap-3 rounded-md px-3 py-2 leading-5 font-semibold transition-colors duration-150 ease-out",
           "before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full",
           isActive
             ? "bg-surface-2 text-primary before:bg-primary"
@@ -25,7 +25,7 @@ function SideLink({ item, badge, badgeLabel }: { item: NavItem; badge?: number; 
       }
     >
       <Icon aria-hidden="true" className="size-5 shrink-0" />
-      <span className="min-w-0 flex-1 truncate">{t(item.key)}</span>
+      <span className="min-w-0 flex-1">{t(item.key)}</span>
       {badge ? (
         <span className="rounded-full bg-warning px-2 text-caption font-bold text-warning-foreground tabular-nums">
           <span aria-hidden="true">{badge}</span>
@@ -69,7 +69,7 @@ export function SideNav({ waiting, dataStatus }: { waiting: number; dataStatus: 
         <p id={langId} className="px-1 text-caption font-semibold text-muted-foreground">
           {t("topbar.language")}
         </p>
-        <LanguageSwitch labelledBy={langId} />
+        <LanguageSwitch labelledBy={langId} compact />
         <p className="px-1 text-caption text-muted-foreground">{dataStatus}</p>
       </div>
     </aside>
