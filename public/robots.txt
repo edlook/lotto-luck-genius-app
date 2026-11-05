@@ -1,0 +1,6 @@
+# Lotto-Luck-Genius is a personal tool and must not appear in search results.
+# Indexing is blocked by <meta name="robots" content="noindex, nofollow"> in index.html.
+# Crawling stays allowed on purpose: with "Disallow: /" a bot could not read that meta tag,
+# and the URL might still be listed (without a snippet) if someone links to it.
+User-agent: *
+Allow: /
