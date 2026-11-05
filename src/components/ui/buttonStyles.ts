@@ -12,7 +12,8 @@ export interface ButtonStyleProps {
 }
 
 const BASE =
-  "inline-flex select-none items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap " +
+  // Labels may wrap (long German strings at 320 px) instead of pushing the page sideways.
+  "inline-flex max-w-full select-none items-center justify-center gap-2 rounded-md py-2 text-center leading-5 font-semibold " +
   "transition-[background-color,color,border-color,box-shadow,transform,opacity] duration-150 ease-out " +
   "motion-safe:active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 " +
   "aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:size-5 [&_svg]:shrink-0";
