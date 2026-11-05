@@ -304,6 +304,20 @@
     }
   }
 
+  /* ---------- Entrance of freshly generated rows (stagger 50 ms, --i = index) ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .llg-appear {
+      animation: llg-appear 220ms var(--ease-out) both;
+      animation-delay: calc(var(--i, 0) * 50ms);
+    }
+  }
+  @keyframes llg-appear {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
   /* ---------- Skeleton ---------- */
   .llg-skeleton {
     background-color: hsl(var(--muted) / 0.6);
