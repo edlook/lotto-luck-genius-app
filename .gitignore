@@ -1,0 +1,19 @@
+# dependencies and build output
+node_modules/
+dist/
+dev-dist/
+coverage/
+
+# raw draw downloads (rebuilt by npm run data:update)
+.data-cache/
+
+# secrets and local overrides
+.env*
+*.local
+
+# editors / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log

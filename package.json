@@ -1,0 +1,53 @@
+{
+  "name": "lotto-luck-genius",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Personal tool for EuroJackpot and Lotto 6 aus 49: honest generator, ticket check, odds and statistics.",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc -b --noEmit",
+    "contrast": "node scripts/check-contrast.mjs",
+    "i18n": "node scripts/build-i18n.mjs",
+    "icons": "node scripts/build-maskable-icon.mjs",
+    "data:update": "node scripts/update-draws.mjs",
+    "data:lotto649": "node scripts/build-lotto649.mjs",
+    "data:lotto649:verify": "node scripts/verify-lotto649.mjs",
+    "data:ej:fetch": "node scripts/fetch-eurojackpot.mjs",
+    "data:ej:build": "node scripts/build-eurojackpot.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "5.3.0",
+    "lucide-react": "1.69.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router": "7.18.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@tailwindcss/vite": "4.3.4",
+    "@types/node": "20.19.43",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "5.2.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "globals": "17.14.0",
+    "tailwindcss": "4.3.4",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "6.4.5",
+    "vite-plugin-pwa": "2.0.0",
+    "vitest": "4.1.12"
+  }
+}
