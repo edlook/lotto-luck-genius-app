@@ -102,10 +102,15 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
                 setMode(m);
               }}
               block
+              className="[&>button]:py-1.5 [&>button]:leading-5 [&>button]:whitespace-normal"
             />
             <p className="text-caption text-muted-foreground">{t(`generator.mode.${mode}.hint`)}</p>
           </div>
-          <Field label={t("generator.fields.label")} help={count ? tp("generator.fields.value", count) : undefined}>
+          <Field
+            label={t("generator.fields.label")}
+            help={count ? tp("generator.fields.value", count) : undefined}
+            className="sm:w-52"
+          >
             <NumberInput
               value={count}
               onChange={(v) => {
@@ -116,7 +121,6 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
               max={MAX_FIELDS}
               decrementLabel={t("generator.fields.decrease")}
               incrementLabel={t("generator.fields.increase")}
-              className="w-16"
               locale={locale}
             />
           </Field>
@@ -125,6 +129,8 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
           {t(current ? "generator.cta.again" : "generator.cta")}
         </Button>
       </Card>
+
+      <HonestyNote>{t("honesty.chance")}</HonestyNote>
 
       <div ref={resultsRef} className="scroll-mt-40">
         {!current ? (
@@ -336,7 +342,6 @@ export default function Generator() {
   return (
     <>
       <PageHeader title={t("generator.title", { game: t(`game.${game}.name`) })} />
-      <HonestyNote className="mb-5">{t("honesty.chance")}</HonestyNote>
       <Tabs
         label={t("generator.title", { game: t(`game.${game}.name`) })}
         value={tab}

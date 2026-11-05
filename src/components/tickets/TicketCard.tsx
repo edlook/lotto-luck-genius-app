@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { CalendarClock, CircleDashed, Pencil, Trash2, Trophy, TriangleAlert } from "lucide-react";
 import { BallRow, Button, ButtonLink, Card } from "@/components/ui";
 import { useI18n } from "@/i18n/context";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { OFFICIAL_RESULTS } from "@/lib/links";
 import type { Ticket } from "@/lib/storage/stores";
 import type { FieldCheck } from "@/lib/ticketCheck";
@@ -51,7 +52,7 @@ function FieldResult({ check, game }: { check: FieldCheck; game: Ticket["game"] 
           href={OFFICIAL_RESULTS[game]}
           target="_blank"
           rel="noreferrer noopener"
-          className="text-caption text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          className="inline-flex min-h-11 items-center self-start text-caption text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
           {t("tickets.result.amount.official")}
         </a>
@@ -101,6 +102,8 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
   const { t, tp, date } = useI18n();
   const headingId = useId();
   const [showAll, setShowAll] = useState(false);
+  // 32 px balls on phones keep a 6 + SZ / 5 + 2 row on one line; the balls are not buttons.
+  const wide = useMediaQuery("(min-width: 40rem)");
   const H = level === 2 ? "h2" : "h3";
 
   const dates = [...ticket.drawDates].sort();
@@ -151,7 +154,7 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
                 main={f.main}
                 {...(f.euro ? { euro: f.euro } : {})}
                 {...(ticket.game === "649" ? { superzahl: ticket.superzahl ?? null } : {})}
-                size="md"
+                size={wide ? "md" : "sm"}
                 {...(check
                   ? { matches: { main: check.mainHits, euro: check.euroHits, superzahl: check.szMatch } }
                   : {})}

@@ -28,9 +28,12 @@ for (const line of md.split(/\r?\n/)) {
   const [key, ru, en, de] = cells;
   if (!KEY.test(key)) continue;
   if (key in dicts.ru) throw new Error(`Duplicate key ${key}`);
-  dicts.ru[key] = ru;
-  dicts.en[key] = en;
-  dicts.de[key] = de;
+  // Copy deck §0: numbers must not break across lines. Digit-group spaces ("139 838 160")
+  // and the space before € / % become non-breaking.
+  const nb = (v) => v.replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u00A0").replace(/(\d) (?=[€%])/g, "$1\u00A0");
+  dicts.ru[key] = nb(ru);
+  dicts.en[key] = nb(en);
+  dicts.de[key] = nb(de);
 }
 
 const outDir = path.join(root, "src", "i18n");
