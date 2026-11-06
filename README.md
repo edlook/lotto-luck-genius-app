@@ -15,7 +15,7 @@ No accounts, no backend: draw archives are static JSON in `public/data/`, ticket
 | `npm test` | Unit tests (Vitest) |
 | `npm run lint` / `npm run typecheck` | ESLint (flat config) / TypeScript strict |
 | `npm run contrast` | WCAG contrast of the colour tokens in `src/index.css` |
-| `npm run i18n` | Rebuild `src/i18n/{ru,en,de}.json` from `../texts/site-copy.md` |
+| `npm run i18n` | Rebuild `src/i18n/{ru,en,de}.json` and the on-demand `guide/`, `coach/` dictionaries from `../texts/site-copy.md` and `../texts/guide-copy.md` |
 | `npm run icons` | Redraw the PWA icons and favicons (no dependencies) |
 | `npm run data:update` | Fetch new draws (EuroJackpot official JSON, Lotto 6aus49 archive + WestLotto spot-check) into `public/data/`; raw downloads are cached in `.data-cache/` (git-ignored) |
 
@@ -92,6 +92,8 @@ additive classes rather than overriding existing ones.
   are tickets of the game or the sidebar is visible, so /odds and /about never wait for it.
 - `useIdle()`, `useMediaQuery(query)`, `useInView(ref)` — small helpers for deferred work.
 - `usePageMeta(page, params?)` — title, description and `<html lang>` from `seo.{page}.*`.
+- `useHints(screen, build)` — the one tip of a screen (pure conditions in `lib/hints.ts`, state in `llg.hints.v1`); render it with `<Hint control onAction>`.
+- `useNamespace("guide"|"coach")` — loads an on-demand dictionary (guide page; tour and tips) and says when it is ready.
 - `useI18n()` — `t`, `tp` (plural), `num`, `money`, `percent`, `date`, `weekday`, `lang`, `setLang`.
 - `useUniformityTest(observed, draws, k, pool)` — Monte Carlo p-value in a Web Worker.
 - `useLocalStore(store)` with `ticketsStore`, `userDrawsStore`, `oddsStore` from `lib/storage/stores`.

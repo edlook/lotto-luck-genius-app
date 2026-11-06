@@ -25,8 +25,15 @@ function useScrollManagement() {
   useEffect(() => {
     if (hash) {
       const id = decodeURIComponent(hash.slice(1));
-      const t = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: "start" }), 50);
-      return () => window.clearTimeout(t);
+      // A screen is a lazy chunk (and /guide also waits for its texts): the target may not exist
+      // yet on a direct visit, so look for it for a few seconds instead of once.
+      let tries = 0;
+      const t = window.setInterval(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ block: "start" });
+        if (el || ++tries > 40) window.clearInterval(t);
+      }, 50);
+      return () => window.clearInterval(t);
     }
     window.scrollTo({ top: 0 });
   }, [pathname, hash]);

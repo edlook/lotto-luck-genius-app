@@ -57,7 +57,7 @@ function TourDialog({ onExited }: { onExited: () => void }) {
       open={open}
       onClose={() => finish(true)}
       title={t(`tour.step${n}.title`)}
-      closeLabel={t("tour.skip")}
+      closeLabel={t("common.close")}
       dismissible={false}
       footer={
         <>
