@@ -40,9 +40,11 @@ src/
   i18n/                   provider (Intl.PluralRules, lazy EN/DE), generated dictionaries
   lib/                    maths and data: odds, ev, popularity, rng, generator, ticketCheck,
                           ticketStatus, stats, drawCalendar, eras, csvImport, games, archive;
+                          backtest, popularityValidation, analysisJobs, seededRng;
                           screen logic: ticketSummary, ticketDraft, drawsView, statsView, userDrawOps
   lib/storage/            localStore (useSyncExternalStore), stores, validate, gameStore
   workers/stats.worker.ts Monte Carlo uniformity test off the main thread
+  workers/analysis.worker.ts /backtest analyses (strategy backtest, popularity check) off the main thread
 scripts/                  data, icons, i18n, contrast
 public/data/              draw archives (served and cached at runtime, not precached)
 ```
