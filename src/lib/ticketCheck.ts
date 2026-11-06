@@ -35,6 +35,8 @@ export interface Draw {
   /** Published quotas: [label "k+m", winners, amount EUR]. */
   quotes?: [string, number, number][];
   jackpot?: number | null;
+  /** EuroJackpot: stake of the main lottery of this draw in EUR (official data), null if unknown. */
+  stake?: number | null;
   source: "archive" | "user";
 }
 

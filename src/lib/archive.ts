@@ -55,7 +55,7 @@ export async function fetchArchive(game: GameId): Promise<Archive> {
   const draws: Draw[] =
     game === "649"
       ? (raw.draws as Raw649[]).map(([date, main, sz]) => ({ game, date, main, superzahl: sz, source: "archive" as const }))
-      : (raw.draws as RawEj[]).map(([date, main, euro, era, quotes, jackpot]) => ({
+      : (raw.draws as RawEj[]).map(([date, main, euro, era, quotes, jackpot, stake]) => ({
           game,
           date,
           main,
@@ -63,6 +63,7 @@ export async function fetchArchive(game: GameId): Promise<Archive> {
           euroPool: eraPool.get(era) ?? 12,
           quotes,
           jackpot,
+          stake: stake ?? null,
           source: "archive" as const,
         }));
   return {
