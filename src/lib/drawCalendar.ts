@@ -57,6 +57,8 @@ function segmentFor(game: GameId, iso: string): ScheduleSegment | undefined {
 
 /** True if the date is a regular draw day of the game (current or historical schedule). */
 export function isDrawDay(game: GameId, iso: string): boolean {
+  // No draws before the game started (QA B10).
+  if (iso < GAME_START[game]) return false;
   const seg = segmentFor(game, iso);
   if (seg) return seg.days.includes(weekday(iso));
   // Before the checked schedule: accept the current weekdays (historic data comes from the archive).

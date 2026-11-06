@@ -77,7 +77,8 @@ export function Tabs<T extends string = string>({
               type="button"
               role="tab"
               aria-selected={selected}
-              aria-controls={`${base}-panel-${t.id}`}
+              // Panels of other tabs are not rendered unless keepMounted: no dangling reference.
+              {...(keepMounted || selected ? { "aria-controls": `${base}-panel-${t.id}` } : {})}
               tabIndex={selected ? 0 : -1}
               onClick={() => select(i)}
               className={cx(

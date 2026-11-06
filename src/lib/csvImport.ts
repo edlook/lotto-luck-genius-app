@@ -51,14 +51,19 @@ export function parseDrawCsv(game: GameId, text: string, today: string = berlinN
   const seenDates = new Set<string>();
   let found = 0;
   let looksLikeData = 0;
+  let firstLine = true;
 
   lines.forEach((line, i) => {
     const row = i + 1;
     if (line.trim() === "") return;
+    const isFirst = firstLine;
+    firstLine = false;
     const cells = line.split(/[;,\t]/).map((c) => c.trim());
     const date = parseDate(cells[0] ?? "");
     if (!date) {
-      if (found === 0 && looksLikeData === 0) return; // header line
+      // Only the first non-empty line may be a header, and only if its first cell has no digits
+      // ("Datum", "date"); an unreadable date such as 31.02.2024 is reported (QA B11).
+      if (isFirst && !/\d/.test(cells[0] ?? "")) return;
       found++;
       errors.push({ row, code: "date", value: cells[0] ?? "" });
       return;

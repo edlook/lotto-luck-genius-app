@@ -3,7 +3,7 @@
  * Kept out of the component so the rules are unit-tested.
  */
 import { GAMES, type GameId } from "./games";
-import { drawSeries, isDrawDay, isValidIsoDate } from "./drawCalendar";
+import { GAME_START, drawSeries, isDrawDay, isValidIsoDate } from "./drawCalendar";
 import type { Ticket } from "./storage/validate";
 
 export type DrawMode = "next" | "date" | "series";
@@ -63,7 +63,8 @@ export function validateDraft(draft: TicketDraft, formatDate: (iso: string) => s
       errors.field[i] = { key: "tickets.drawer.error.fieldIncomplete", params: { n: i + 1 } };
   });
   if (draft.mode !== "next") {
-    if (!isValidIsoDate(draft.date)) errors.date = { key: "tickets.drawer.error.date" };
+    if (!isValidIsoDate(draft.date) || draft.date < GAME_START[draft.game])
+      errors.date = { key: "tickets.drawer.error.date" };
     else if (draft.mode === "date" && !isDrawDay(draft.game, draft.date))
       errors.date = { key: "tickets.drawer.error.dateNotDrawDay", params: { date: formatDate(draft.date) } };
   }

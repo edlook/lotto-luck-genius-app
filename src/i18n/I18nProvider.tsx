@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import ru from "./ru.json";
 import { interpolate, pickPlural, type Dict, type Lang } from "./format";
+import { toast } from "@/components/ui/toastStore";
 import { I18nContext, type I18n } from "./context";
 
 const STORAGE_KEY = "llg.lang";
@@ -33,14 +34,32 @@ function readStoredLang(): Lang {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(readStoredLang);
   const [dict, setDict] = useState<Dict>(ru as Dict);
+  // The language whose dictionary is shown. <html lang> and number formats follow it, so they
+  // never run ahead of the texts (QA B16).
+  const [shown, setShown] = useState<Lang>("ru");
 
   useEffect(() => {
     let alive = true;
-    loaders[lang]().then((d) => alive && setDict(d));
-    document.documentElement.lang = lang;
+    loaders[lang]().then(
+      (d) => {
+        if (!alive) return;
+        setDict(d);
+        setShown(lang);
+        document.documentElement.lang = lang;
+      },
+      () => {
+        // Chunk missing (offline on a first visit, tab older than the deployed build): keep the
+        // language that is on screen and say so.
+        if (!alive) return;
+        setLangState(shown);
+        toast.error(dict["error.network.title"] ?? (ru as Dict)["error.network.title"] ?? "");
+      },
+    );
     return () => {
       alive = false;
     };
+    // `shown` and `dict` are only read on failure, never a reason to reload the dictionary.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
   const setLang = useCallback((l: Lang) => {
@@ -53,11 +72,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<I18n>(() => {
-    const locale = LOCALES[lang];
+    const locale = LOCALES[shown];
     const lookup = (key: string) => dict[key] ?? (ru as Dict)[key] ?? key;
     const nf = (o?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale, o);
     return {
-      lang,
+      lang: shown,
       locale,
       setLang,
       t: (key, params) => interpolate(lookup(key), params),
@@ -77,14 +96,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
           locale,
           o
             ? { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric", ...o }
-            : lang === "en"
+            : shown === "en"
               ? { timeZone: "UTC", dateStyle: "medium" }
               : { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" },
         ).format(new Date(`${iso}T00:00:00Z`)),
       weekday: (iso) =>
         new Intl.DateTimeFormat(locale, { timeZone: "UTC", weekday: "short" }).format(new Date(`${iso}T00:00:00Z`)),
     };
-  }, [dict, lang, setLang]);
+  }, [dict, shown, setLang]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

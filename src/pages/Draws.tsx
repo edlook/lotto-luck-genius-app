@@ -44,6 +44,13 @@ export default function Draws() {
   const { t, tp, date, weekday } = useI18n();
   const [game] = useGame();
   const data = useDraws(game);
+  const drawSummary = (d: Draw) => {
+    const numbers = d.main.join(", ");
+    if (d.euro?.length) return t("ball.summary.ej", { numbers, euro: d.euro.join(", ") });
+    if (d.game === "649")
+      return d.superzahl == null ? t("ball.summary.649.noSz", { numbers }) : t("ball.summary.649", { numbers, sz: d.superzahl });
+    return numbers;
+  };
   const tickets = useLocalStore(ticketsStore);
   const navigate = useNavigate();
   usePageMeta("draws");
@@ -176,7 +183,8 @@ export default function Draws() {
                       aria-label={
                         t("draws.row.aria", {
                           date: date(d.date),
-                          numbers: [...d.main, ...(d.euro ?? [])].join(", "),
+                          // Same sentence as the ball row: Euro numbers / Superzahl named, not appended (QA B17).
+                          numbers: drawSummary(d),
                         }) + (count ? `. ${t("draws.row.myTickets")}: ${count}` : "")
                       }
                       className="flex min-h-14 items-center gap-3 px-3 py-2 outline-offset-[-2px] hover:bg-surface-2 sm:px-4"
