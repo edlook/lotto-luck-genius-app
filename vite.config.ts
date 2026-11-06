@@ -35,13 +35,20 @@ export default defineConfig({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/data\//],
         cleanupOutdatedCaches: true,
+        // The registration script is injected as "script-defer", so the plugin does not add these
+        // itself (QA B1): without them a new worker stays in "waiting" until every tab is closed.
+        // The page announces the switch (see useServiceWorkerUpdate) and reloads on request.
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
-            // Draw archives: show the cached copy at once, refresh in the background.
+            // Draw archives: the network first (QA B5: a stale copy would hide the newest draw for a
+            // whole session), the cached copy when offline or when the network takes over 3 s.
             urlPattern: ({ url }) => url.pathname.startsWith("/data/") && url.pathname.endsWith(".json"),
-            handler: "StaleWhileRevalidate",
+            handler: "NetworkFirst",
             options: {
               cacheName: "llg-draw-data",
+              networkTimeoutSeconds: 3,
               expiration: { maxEntries: 8 },
               cacheableResponse: { statuses: [0, 200] },
             },

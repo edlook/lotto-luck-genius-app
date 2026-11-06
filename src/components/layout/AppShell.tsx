@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui";
 import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
+import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import { useIdle } from "@/hooks/useIdle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/hooks/useMediaQuery";
 import { ticketsStore } from "@/lib/storage/stores";
@@ -40,6 +41,7 @@ export function AppShell() {
   const tickets = useLocalStore(ticketsStore);
   const { pathname } = useLocation();
   useScrollManagement();
+  useServiceWorkerUpdate();
 
   // The badge and the sidebar data line need the draw archive (~280 KB for EuroJackpot).
   // Never let them compete with the first render: start the request only when the browser

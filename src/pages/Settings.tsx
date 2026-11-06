@@ -351,10 +351,26 @@ export default function Settings() {
     try {
       const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
       if (reg) await reg.update();
-      if (reg && (reg.installing || reg.waiting)) {
-        toast(t("update.available"), {
-          action: { label: t("update.action"), onClick: () => window.location.reload() },
-        });
+      const incoming = reg?.installing ?? reg?.waiting ?? null;
+      if (reg && incoming) {
+        // The worker skips waiting by itself; the toast with "Update" appears when it takes over
+        // (useServiceWorkerUpdate). Wait for that, so the reload cannot hit a half-installed build.
+        if (incoming.state !== "activated") {
+          await new Promise<void>((resolve, reject) => {
+            const timer = window.setTimeout(() => reject(new Error("update timeout")), 30_000);
+            incoming.addEventListener("statechange", () => {
+              if (incoming.state === "activated") {
+                window.clearTimeout(timer);
+                resolve();
+              } else if (incoming.state === "redundant") {
+                window.clearTimeout(timer);
+                reject(new Error("update failed"));
+              }
+            });
+            // A worker that sits in "waiting" is asked to take over (same protocol as workbox).
+            if (incoming.state === "installed") incoming.postMessage({ type: "SKIP_WAITING" });
+          });
+        }
       } else toast.success(t("settings.tech.upToDate"));
     } catch {
       toast.error(t("error.network.title"), { description: t("error.network.body") });

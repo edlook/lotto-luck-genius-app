@@ -2,7 +2,7 @@
  * Tiny cache for the static draw archives (replaces @tanstack/react-query, ~13 KB gzip).
  *
  * - One entry per game, shared by every component (module-level store + useSyncExternalStore).
- * - Fresh for 1 hour; after that the next mount refetches in the background and keeps
+ * - Fresh for 5 minutes; after that the next mount refetches in the background and keeps
  *   showing the old data meanwhile (stale-while-revalidate, like the service worker).
  * - One automatic retry on failure; `refetch()` forces a new request.
  * - Concurrent requests for the same game are de-duplicated.
@@ -11,7 +11,8 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 import type { GameId } from "@/lib/games";
 import { fetchArchive, type Archive } from "@/lib/archive";
 
-const STALE_MS = 60 * 60 * 1000;
+// Short on purpose (QA B5): a draw published after the first load shows up on the next mount.
+const STALE_MS = 5 * 60 * 1000;
 const RETRIES = 1;
 
 type Status = "idle" | "loading" | "success" | "error";

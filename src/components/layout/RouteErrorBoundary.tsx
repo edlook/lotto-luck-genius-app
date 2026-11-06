@@ -20,7 +20,7 @@ interface State {
 
 /**
  * Catches render errors and failed lazy chunks (e.g. offline after an update) of one
- * screen. Retry reloads the page, which also picks up a new service-worker build.
+ * screen. Retry reloads the page; the service worker takes over new builds by itself (skipWaiting + clientsClaim), so the reload runs the current build.
  */
 export class RouteErrorBoundary extends Component<{ children: ReactNode }, State> {
   override state: State = { error: null };
