@@ -76,7 +76,7 @@ export function SegmentedControl<T extends string>({
         orientation === "vertical"
           ? "flex flex-col"
           : columns === 2
-            ? "grid grid-cols-2 min-[480px]:flex"
+            ? "grid grid-cols-2 min-[480px]:flex [&>button:last-child:nth-child(odd)]:col-span-2 min-[480px]:[&>button:last-child:nth-child(odd)]:col-span-1"
             : block
               ? "flex"
               : "inline-flex",

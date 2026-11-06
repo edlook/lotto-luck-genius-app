@@ -13,11 +13,12 @@ export function Logo({ className }: { className?: string }) {
         className,
       )}
     >
+      {/* An outlined ball with a dot, no digit: a filled gold circle with "1" read as a notification badge. */}
       <span
         aria-hidden="true"
-        className="inline-flex size-7 items-center justify-center rounded-full bg-[linear-gradient(135deg,hsl(var(--ball-main-from)),hsl(var(--ball-main-to)))] text-caption font-extrabold text-primary-foreground"
+        className="inline-flex size-7 items-center justify-center rounded-full border-2 border-primary"
       >
-        1
+        <span className="size-2.5 rounded-full bg-primary" />
       </span>
       {t("app.name")}
     </Link>

@@ -109,7 +109,7 @@ function GameStatus({ game, enabled }: { game: GameId; enabled: boolean }) {
 function Block({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <Section id={id} title={title} className="scroll-mt-40 lg:scroll-mt-8">
-      <div className="flex flex-col gap-3">{children}</div>
+      <div className="flex max-w-[68ch] flex-col gap-3">{children}</div>
     </Section>
   );
 }

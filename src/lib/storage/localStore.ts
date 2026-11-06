@@ -35,7 +35,7 @@ export interface LocalStore<T> {
 export interface StoreOptions {
   /**
    * True when `value` (from `parsed`) lost part of the stored data: e.g. entries that did not
-   * pass validation. Unparseable JSON always counts as lossy. Lossy data is backed up before the
+   * pass validation. Unparseable JSON counts as lossy too (only for stores that pass `isLossy`). Lossy data is backed up before the
    * next write instead of being overwritten silently.
    */
   isLossy?: (parsed: unknown, value: unknown) => boolean;
@@ -114,7 +114,8 @@ export function createLocalStore<T>(
         lossy = options.isLossy?.(parsed, value) ?? false;
       } catch {
         value = fallback;
-        lossy = true;
+        // Only stores that opted in (isLossy) keep a copy; settings just fall back to defaults.
+        lossy = options.isLossy !== undefined;
       }
     }
     if (lossy && raw !== null) {
@@ -175,6 +176,8 @@ export function createLocalStore<T>(
       } catch {
         /* nothing to clear */
       }
+      pending = null;
+      pendingSnapshot = null;
       emit();
     },
   };

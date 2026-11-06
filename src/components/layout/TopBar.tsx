@@ -4,13 +4,12 @@ import { ChevronRight, EllipsisVertical } from "lucide-react";
 import { IconButton, Sheet } from "@/components/ui";
 import { useI18n } from "@/i18n/context";
 import { SECONDARY_NAV } from "./navItems";
-import { GameSwitch } from "./GameSwitch";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { Logo } from "./Logo";
 
 /**
- * Phones (< 1024 px): sticky header with the name (home link), the menu button and the
- * game switch underneath. The menu is a bottom sheet (easy to reach with the thumb):
+ * Phones (< 1024 px): sticky header with the name (home link) and the menu button. The game switch
+ * scrolls with the page (AppShell): it is used rarely and must not eat 50 px everywhere (QA P2-5). The menu is a bottom sheet (easy to reach with the thumb):
  * language RU/EN/DE, "About the method", "Data and settings".
  */
 export function TopBar() {
@@ -32,9 +31,6 @@ export function TopBar() {
         <IconButton label={t("topbar.menu.aria")} aria-haspopup="dialog" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
           <EllipsisVertical />
         </IconButton>
-      </div>
-      <div className="mx-auto max-w-[var(--content-max)] px-4 pb-2">
-        <GameSwitch />
       </div>
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("topbar.menu")} closeLabel={t("common.close")}>

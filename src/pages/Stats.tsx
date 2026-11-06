@@ -159,7 +159,8 @@ export default function Stats() {
     };
   }, [cfg, inPeriod, t]);
 
-  const title = t("stats.title", { game: t(`game.${game}.name`) });
+  const title = t("stats.title");
+  const eyebrow = t(`game.${game}.name`);
 
   let body;
   if (data.isLoading) {
@@ -284,7 +285,7 @@ export default function Stats() {
 
   return (
     <>
-      <PageHeader title={title} />
+      <PageHeader title={title} eyebrow={eyebrow} />
       <HonestyNote className="mb-6">{t("stats.frame")}</HonestyNote>
       {body}
     </>

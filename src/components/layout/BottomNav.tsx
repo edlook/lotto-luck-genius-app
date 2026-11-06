@@ -23,7 +23,7 @@ export function BottomNav({ waiting }: { waiting: number }) {
               end={to === "/"}
               className={({ isActive }) =>
                 cx(
-                  "relative flex flex-1 flex-col items-center justify-center gap-1 px-1 text-[12px] leading-4 font-semibold",
+                  "relative flex flex-1 flex-col items-center justify-center gap-1 px-1 text-nav font-semibold",
                   "transition-colors duration-150 ease-out select-none",
                   "before:absolute before:inset-x-4 before:top-0 before:h-0.5 before:rounded-full",
                   isActive

@@ -140,7 +140,13 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
             />
           </Field>
         </div>
-        <Button size="lg" block icon={current ? <RefreshCw /> : <Dices />} onClick={generate}>
+        <Button
+          size="lg"
+          block
+          variant={current ? "secondary" : "primary"}
+          icon={current ? <RefreshCw /> : <Dices />}
+          onClick={generate}
+        >
           {t(current ? "generator.cta.again" : "generator.cta")}
         </Button>
       </Card>
@@ -177,7 +183,7 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
                       </div>
                       <BallRow main={f.main} {...(f.euro ? { euro: f.euro } : {})} size={big ? "lg" : "md"} />
                       {report ? (
-                        <Disclosure summary={t("generator.result.why")}>
+                        <Disclosure summary={t("generator.result.why")} flush>
                           <PopularityRules report={report} headingLevel={4} />
                         </Disclosure>
                       ) : null}
@@ -204,16 +210,17 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
                 );
               })}
             </ol>
-            <p className="text-caption text-muted-foreground">
-              {t(cfg.extraCount ? "generator.result.euroNote" : "generator.result.szNote")}
-            </p>
             <SaveTicketPanel
               key={current.run}
               game={game}
               fields={current.fields}
               source="generator"
               label={t("generator.result.save")}
+              variant="primary"
             />
+            <p className="text-caption text-muted-foreground">
+              {t(cfg.extraCount ? "generator.result.euroNote" : "generator.result.szNote")}
+            </p>
             {current.fields.length > 1 ? (
               <Button
                 variant="ghost"
@@ -358,9 +365,9 @@ export default function Generator() {
 
   return (
     <>
-      <PageHeader title={t("generator.title", { game: t(`game.${game}.name`) })} />
+      <PageHeader title={t("generator.title")} eyebrow={t(`game.${game}.name`)} />
       <Tabs
-        label={t("generator.title", { game: t(`game.${game}.name`) })}
+        label={`${t("generator.title")} · ${t(`game.${game}.name`)}`}
         value={tab}
         onChange={setTab}
         items={[

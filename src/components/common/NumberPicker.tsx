@@ -23,8 +23,8 @@ export interface NumberPickerProps {
 }
 
 const COLS: Record<number, string> = {
-  6: "grid-cols-5 min-[360px]:grid-cols-6",
-  7: "grid-cols-6 min-[360px]:grid-cols-7",
+  6: "grid-cols-5 min-[360px]:grid-cols-6 md:grid-cols-12",
+  7: "grid-cols-6 min-[360px]:grid-cols-7 md:grid-cols-10",
   10: "grid-cols-6 min-[360px]:grid-cols-7 sm:grid-cols-10",
 };
 
@@ -116,7 +116,8 @@ export function NumberPicker({
           {t("evaluate.counter", { selected: value.length, required })}
         </p>
       </div>
-      <ul className={cx("grid gap-1", COLS[columns] ?? COLS[7])}>
+      // max-w keeps the circles at about 50 px on wide screens instead of growing with the column.
+      <ul className={cx("grid max-w-[36rem] gap-1", COLS[columns] ?? COLS[7])}>
         {Array.from({ length: pool }, (_, i) => i + 1).map((n) => {
           const on = value.includes(n);
           return (

@@ -116,7 +116,8 @@ export default function Tickets() {
 
   const header = (
     <PageHeader
-      title={t("tickets.title", { game: t(`game.${game}.name`) })}
+      title={t("tickets.title")}
+      eyebrow={t(`game.${game}.name`)}
       actions={
         <>
           <Button id="tickets-add" icon={<Plus />} onClick={openNew} className="max-lg:hidden">

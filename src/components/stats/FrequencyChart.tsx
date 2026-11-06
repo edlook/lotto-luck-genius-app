@@ -38,18 +38,26 @@ export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProp
         >
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 bg-secondary/25"
+            className="absolute inset-x-0 bg-secondary/35"
             style={{ bottom: pct(band.low), height: `calc(${pct(band.high)} - ${pct(band.low)})` }}
           />
           <div className="absolute inset-0 flex items-end gap-px sm:gap-0.5">
-            {rows.map((r) => (
-              <div
-                key={r.number}
-                title={`${r.number}: ${r.observed}`}
-                className={cx("min-w-0 flex-1 rounded-t-[2px]", tone === "main" ? "bg-primary" : "bg-accent")}
-                style={{ height: pct(r.observed) }}
-              />
-            ))}
+            {rows.map((r) => {
+              // Colour marks only what leaves the typical spread; everything else is neutral, so the
+              // gold of the app stays with results and actions.
+              const outside = r.observed > band.high || r.observed < band.low;
+              return (
+                <div
+                  key={r.number}
+                  title={`${r.number}: ${r.observed}`}
+                  className={cx(
+                    "min-w-0 flex-1 rounded-t-[2px]",
+                    outside ? "bg-warning" : tone === "main" ? "bg-foreground/35" : "bg-accent/45",
+                  )}
+                  style={{ height: pct(r.observed) }}
+                />
+              );
+            })}
           </div>
           <div
             aria-hidden="true"
@@ -76,8 +84,12 @@ export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProp
             {t("stats.chart.expected")}: {fmt1(expected)}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden="true" className="inline-block size-3 rounded-sm bg-secondary/40" />
+            <span aria-hidden="true" className="inline-block size-3 rounded-sm bg-secondary/35" />
             {t("stats.chart.band")}: {fmt1(band.low)}–{fmt1(band.high)}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block size-3 rounded-sm bg-warning" />
+            {t("stats.chart.outside")}
           </span>
           <span>
             {t("stats.chart.axisX")} → · {t("stats.chart.axisY")} ↑
@@ -177,7 +189,7 @@ export function CompareTable({
           </th>
           <th scope="col" className="py-1.5 pr-2 font-semibold">
             <span className="inline-flex items-baseline gap-1.5">
-              <span aria-hidden="true" className="inline-block size-2.5 shrink-0 rounded-sm bg-primary" />
+              <span aria-hidden="true" className="inline-block size-2.5 shrink-0 rounded-sm bg-foreground/70" />
               {t("stats.dist.observed")}
             </span>
           </th>
@@ -202,7 +214,7 @@ export function CompareTable({
               <span className="block tabular-nums">{percent(r.observed, 1)}</span>
               <span
                 aria-hidden="true"
-                className="block h-1.5 rounded-full bg-primary"
+                className="block h-1.5 rounded-full bg-foreground/70"
                 style={{ width: `${(r.observed / max) * 100}%` }}
               />
             </td>

@@ -4,6 +4,8 @@ import { cx } from "@/lib/cx";
 export interface PageHeaderProps {
   /** The screen's H1 (one per page). */
   title: ReactNode;
+  /** Small line above the H1, e.g. the game: keeps "Screen · Game" from breaking at the dot (QA P2-6). */
+  eyebrow?: ReactNode;
   description?: ReactNode;
   /** Actions at the right (e.g. a screen menu). */
   actions?: ReactNode;
@@ -11,10 +13,13 @@ export interface PageHeaderProps {
 }
 
 /** H1 of a screen. Plain foreground text: gold is reserved for one accent per screen. */
-export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, description, actions, className }: PageHeaderProps) {
   return (
     <header className={cx("mb-6 flex items-start justify-between gap-3", className)}>
-      <div className="flex min-w-0 flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        {eyebrow ? (
+          <p className="text-caption font-semibold tracking-wide text-muted-foreground uppercase">{eyebrow}</p>
+        ) : null}
         <h1 className="text-title-2 font-extrabold tracking-tight text-balance text-foreground lg:text-title-1">
           {title}
         </h1>

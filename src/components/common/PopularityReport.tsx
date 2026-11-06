@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { CircleCheck, CircleDashed, CircleMinus, TriangleAlert } from "lucide-react";
+import { Disclosure } from "./Disclosure";
 import { useI18n } from "@/i18n/context";
 import { cx } from "@/lib/cx";
 import type { PopularityLevel, PopularityReport as Report, RuleResult } from "@/lib/popularity";
@@ -62,6 +63,26 @@ export function PopularityRules({ report, headingLevel = 3 }: { report: Report; 
         {rules.map((r) => {
           const Icon = STATUS_ICON[r.status];
           const hit = r.status === "triggered";
+          const statusLabel = t(
+            hit
+              ? "popularity.rule.triggered"
+              : r.status === "notTriggered"
+                ? "popularity.rule.notTriggered"
+                : "common.notChecked",
+          );
+          const badge = hit
+            ? r.strength === "strong"
+              ? "border-danger/70 text-danger"
+              : "border-warning/70 text-warning"
+            : "border-border-strong text-muted-foreground";
+          const why = (
+            <>
+              <p className="text-caption text-muted-foreground">{t(`popularity.rule.${r.id}.why`)}</p>
+              <p className="text-caption text-muted-foreground">
+                {t("popularity.source.label")}: {r.sources.map((s) => t(`popularity.source.${s}`)).join("; ")}
+              </p>
+            </>
+          );
           return (
             <li key={r.id} className="flex gap-3 py-3 first:pt-0 last:pb-0">
               <Icon
@@ -71,37 +92,46 @@ export function PopularityRules({ report, headingLevel = 3 }: { report: Report; 
                   hit ? (r.strength === "strong" ? "text-danger" : "text-warning") : "text-muted-foreground",
                 )}
               />
-              <div className="flex min-w-0 flex-col gap-1">
-                <H className="text-body font-semibold text-foreground">
-                  {t(`popularity.rule.${r.id}.name`)}
-                  <span className="font-normal text-muted-foreground">
-                    {" · "}
-                    {t(
-                      hit
-                        ? "popularity.rule.triggered"
-                        : r.status === "notTriggered"
-                          ? "popularity.rule.notTriggered"
-                          : "common.notChecked",
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                {/* Name and status on one line; the status is a badge (icon + word), the strength
+                    is shown only for rules that applied. */}
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <H className="text-body font-semibold text-foreground">{t(`popularity.rule.${r.id}.name`)}</H>
+                  <span
+                    className={cx(
+                      "inline-flex min-h-6 items-center rounded-full border px-2 text-caption font-semibold",
+                      badge,
                     )}
-                    {" · "}
-                    {t(`popularity.strength.${r.strength}`)}
+                  >
+                    {statusLabel}
+                    {hit ? ` · ${t(`popularity.strength.${r.strength}`)}` : ""}
                   </span>
-                </H>
-                <p className={cx("text-body", hit ? "text-foreground" : "text-muted-foreground")}>
-                  {ruleText(r, t, date)}
-                  {r.status === "notChecked" ? (
-                    <>
-                      {" "}
-                      <Link to="/settings#import" className="font-semibold text-primary underline underline-offset-4">
-                        {t("popularity.rule.notChecked.link")}
-                      </Link>
-                    </>
-                  ) : null}
-                </p>
-                <p className="text-caption text-muted-foreground">{t(`popularity.rule.${r.id}.why`)}</p>
-                <p className="text-caption text-muted-foreground">
-                  {t("popularity.source.label")}: {r.sources.map((s) => t(`popularity.source.${s}`)).join("; ")}
-                </p>
+                </div>
+                {hit || r.status === "notChecked" ? (
+                  <p className={cx("text-body", hit ? "text-foreground" : "text-muted-foreground")}>
+                    {ruleText(r, t, date)}
+                    {r.status === "notChecked" ? (
+                      <>
+                        {" "}
+                        <Link to="/settings#import" className="font-semibold text-primary underline underline-offset-4">
+                          {t("popularity.rule.notChecked.link")}
+                        </Link>
+                      </>
+                    ) : null}
+                  </p>
+                ) : null}
+                {hit ? (
+                  why
+                ) : (
+                  <Disclosure summary={t("popularity.rule.details")} flush className="text-caption">
+                    <div className="flex flex-col gap-1">
+                      {r.status === "notChecked" ? null : (
+                        <p className="text-body text-muted-foreground">{ruleText(r, t, date)}</p>
+                      )}
+                      {why}
+                    </div>
+                  </Disclosure>
+                )}
               </div>
             </li>
           );

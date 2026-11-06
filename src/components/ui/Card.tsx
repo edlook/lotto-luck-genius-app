@@ -55,7 +55,7 @@ export function Section({
   const H = level === 2 ? "h2" : "h3";
   const body = card ? <Card>{children}</Card> : children;
   return (
-    <section id={id} aria-labelledby={headingId} className={cx("flex flex-col gap-3", className)}>
+    <section id={id} aria-labelledby={headingId} className={cx("flex min-w-0 flex-col gap-3", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <H id={headingId} className={cx("font-bold text-foreground", level === 2 ? "text-title-3" : "text-body")}>

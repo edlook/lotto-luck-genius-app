@@ -9,7 +9,7 @@ import { useGame } from "@/hooks/useGame";
 import { useArchive } from "@/hooks/useArchive";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { GAMES, type GameId } from "@/lib/games";
-import { anyWin, classOdds } from "@/lib/odds";
+import { anyWin, classOdds, totalCombinations } from "@/lib/odds";
 import { fieldEv, yearCost } from "@/lib/ev";
 import { useLocalStore } from "@/lib/storage/localStore";
 import { oddsStore, type OddsSettings } from "@/lib/storage/stores";
@@ -35,7 +35,9 @@ function ClassTable({ game }: { game: GameId }) {
   // Three significant digits: 0,0000000715 % for the jackpot, 1,52 % for the last class.
   const pct = (p: number) => num(p, { style: "percent", maximumSignificantDigits: 3 });
   return (
-    <table className="w-full text-caption sm:text-body" aria-label={t("odds.table.aria")}>
+    // Scrolls inside its own box on very narrow screens instead of widening the page.
+    <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0" role="region" tabIndex={0} aria-label={t("odds.table.aria")}>
+    <table className="w-full min-w-72 text-caption sm:text-body">
       <thead>
         <tr className="border-b border-border text-left align-bottom text-muted-foreground">
           <th scope="col" className="py-2 pr-2 font-semibold">
@@ -79,12 +81,13 @@ function ClassTable({ game }: { game: GameId }) {
         </tr>
       </tfoot>
     </table>
+    </div>
   );
 }
 
-function Result({ label, value, note }: { label: string; value: string; note?: string }) {
+function Result({ label, value, note, wide }: { label: string; value: string; note?: string; wide?: boolean }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-md bg-background/60 p-3">
+    <div className={`flex flex-col gap-0.5 rounded-md bg-background/60 p-3${wide ? " sm:col-span-2" : ""}`}>
       <dt className="text-caption text-muted-foreground">{label}</dt>
       <dd className="text-title-3 font-extrabold tabular-nums">{value}</dd>
       {note ? <dd className="text-caption text-muted-foreground">{note}</dd> : null}
@@ -285,6 +288,7 @@ function Calculators({ game }: { game: GameId }) {
               value={t("odds.year.result.oneIn", { value: num(1 / y.pJackpot, { maximumFractionDigits: 0 }) })}
             />
             <Result
+              wide
               label={t("odds.year.result.anyWin")}
               value={
                 y.pAnyWin >= 0.9995
@@ -305,13 +309,40 @@ function Calculators({ game }: { game: GameId }) {
   );
 }
 
+/** Worked example for the chosen game; every figure comes from the same code as the calculators. */
+function Example({ game }: { game: GameId }) {
+  const { t, num, money } = useI18n();
+  const cfg = GAMES[game];
+  const y = yearCost({
+    game,
+    ...DEFAULT_YEAR,
+    drawsPerWeek: cfg.drawDays.length,
+    price: cfg.price,
+    feePerDraw: 0,
+    payoutShare: null,
+  });
+  return (
+    <p className="text-body">
+      {t(`odds.example.body.${game}`, {
+        perDraw: DEFAULT_YEAR.fieldsPerDraw,
+        perWeek: cfg.drawDays.length,
+        weeks: DEFAULT_YEAR.weeks,
+        fields: num(y.fields),
+        cost: money(y.stakes),
+        oneIn: num(Math.round(1 / y.pJackpot / 1000) * 1000),
+        total: num(totalCombinations(cfg)),
+      })}
+    </p>
+  );
+}
+
 export default function Odds() {
   const { t } = useI18n();
   const [game] = useGame();
   usePageMeta("odds");
   return (
     <>
-      <PageHeader title={t("odds.title", { game: t(`game.${game}.name`) })} />
+      <PageHeader title={t("odds.title")} eyebrow={t(`game.${game}.name`)} />
       <div className="flex flex-col gap-8">
         <Card className="flex flex-col gap-2">
           <p className="text-title-3 font-bold text-primary">{t(`odds.headline.${game}`)}</p>
@@ -327,7 +358,7 @@ export default function Odds() {
         <Calculators key={game} game={game} />
 
         <Section title={t("odds.example.title")} card>
-          <p className="text-body">{t("odds.example.body")}</p>
+          <Example game={game} />
           <Link
             to="/about#odds"
             className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"

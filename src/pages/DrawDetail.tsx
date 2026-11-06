@@ -99,7 +99,7 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
   const params = { date: date(iso), game: gameName };
   usePageMeta("drawDetail", params);
   const today = berlinNow().date;
-  const title = <PageHeader title={t("draws.detail.title", params)} />;
+  const title = <PageHeader title={t("draws.detail.title", params)} eyebrow={gameName} />;
 
   const kind = classifyDrawDate(game, iso, today, data.byDate);
   const nb = neighbours(data.draws, iso);
@@ -107,16 +107,25 @@ function DrawDetailScreen({ game, iso }: { game: GameId; iso: string }) {
   const evaluations = mine.map((tk) => evaluateTicket(tk, data.byDate, today));
 
   const nav = (
-    <nav aria-label={t("draws.list.aria")} className="flex flex-wrap justify-between gap-2">
+    <nav aria-label={t("draws.list.aria")} className="grid grid-cols-2 gap-2">
       {nb.prev ? (
-        <ButtonLink to={`/draws/${game}/${nb.prev}`} variant="ghost" icon={<ChevronLeft />}>
+        <ButtonLink
+          to={`/draws/${game}/${nb.prev}`}
+          variant="ghost"
+          icon={<ChevronLeft />}
+          className="justify-self-start text-left whitespace-normal"
+        >
           {t("draws.detail.prev")}
         </ButtonLink>
       ) : (
         <span />
       )}
       {nb.next ? (
-        <ButtonLink to={`/draws/${game}/${nb.next}`} variant="ghost">
+        <ButtonLink
+          to={`/draws/${game}/${nb.next}`}
+          variant="ghost"
+          className="col-start-2 justify-self-end text-right whitespace-normal"
+        >
           {t("draws.detail.next")}
           <ChevronRight aria-hidden="true" />
         </ButtonLink>

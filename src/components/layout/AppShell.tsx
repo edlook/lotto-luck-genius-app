@@ -13,6 +13,7 @@ import { countWaitingForData } from "@/lib/ticketSummary";
 import { berlinNow } from "@/lib/drawCalendar";
 import { BottomNav } from "./BottomNav";
 import { SideNav } from "./SideNav";
+import { GameSwitch } from "./GameSwitch";
 import { TopBar } from "./TopBar";
 import { PageFallback } from "./PageFallback";
 import { RouteErrorBoundary } from "./RouteErrorBoundary";
@@ -81,6 +82,9 @@ export function AppShell() {
           tabIndex={-1}
           className="mx-auto w-full max-w-[var(--content-max)] pt-5 pr-[max(1rem,var(--safe-right))] pb-[calc(var(--bottomnav-h)+var(--safe-bottom)+2rem)] pl-[max(1rem,var(--safe-left))] outline-none md:px-6 lg:px-8 lg:pt-8 lg:pb-12"
         >
+          <div className="mb-5 lg:hidden">
+            <GameSwitch />
+          </div>
           <RouteErrorBoundary key={pathname}>
             <Suspense fallback={<PageFallback />}>
               <Outlet />

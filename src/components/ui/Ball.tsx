@@ -4,7 +4,7 @@ import { cx } from "@/lib/cx";
 import { useI18n } from "@/i18n/context";
 
 export type BallVariant = "main" | "euro" | "superzahl" | "empty";
-/** sm = 32 px (list rows, not interactive), md = 44 px (tickets, grids), lg = 56 px (results). */
+/** sm = 32 px (list rows, not interactive), md = 44 px (36 px below 360 px; tickets, grids), lg = 56 px (44 px below 400 px; results). */
 export type BallSize = "sm" | "md" | "lg";
 /** After a check: matched = filled + check mark; missed = outline, muted digit. */
 export type BallState = "default" | "matched" | "missed";
@@ -21,8 +21,9 @@ export interface BallProps {
 
 const SIZE: Record<BallSize, string> = {
   sm: "size-8 text-caption",
-  md: "size-11 text-body",
-  lg: "size-14 text-title-3",
+  // Below 360 / 400 px the balls shrink so a 6 + SZ or 5 + 2 row stays on one line (QA P3-10).
+  md: "size-9 text-body min-[360px]:size-11",
+  lg: "size-11 text-title-3 min-[400px]:size-14",
 };
 
 const FILL: Record<Exclude<BallVariant, "empty">, string> = {
@@ -99,7 +100,7 @@ export function BallRow({ main, euro, superzahl, size = "md", matches, className
     !matches ? "default" : list?.includes(n) ? "matched" : "missed";
   const ballLabel = (n: number, s: BallState) =>
     s === "matched" ? t("ball.aria.match", { n }) : s === "missed" ? t("ball.aria.miss", { n }) : undefined;
-  const gap = size === "sm" ? "gap-1" : "gap-1.5 sm:gap-2";
+  const gap = size === "sm" ? "gap-1" : "gap-1 min-[360px]:gap-1.5 sm:gap-2";
   const tag = "text-caption font-semibold text-muted-foreground";
 
   const szState: BallState =

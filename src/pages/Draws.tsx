@@ -78,12 +78,13 @@ export default function Draws() {
     if (query) navigate(`/draws/${game}/${query}`);
   };
 
-  const title = t("draws.title", { game: t(`game.${game}.name`) });
+  const title = t("draws.title");
+  const eyebrow = t(`game.${game}.name`);
 
   if (data.isLoading) {
     return (
       <>
-        <PageHeader title={title} />
+        <PageHeader title={title} eyebrow={eyebrow} />
         <SkeletonGroup label={t("state.loading.aria")} className="gap-4">
           <Skeleton className="h-5 w-3/4" />
           <Skeleton className="h-40 w-full rounded-lg" />
@@ -98,7 +99,7 @@ export default function Draws() {
   if (total === 0) {
     return (
       <>
-        <PageHeader title={title} />
+        <PageHeader title={title} eyebrow={eyebrow} />
         {data.isError ? (
           <ErrorState
             title={t("error.network.title")}
@@ -125,7 +126,7 @@ export default function Draws() {
 
   return (
     <>
-      <PageHeader title={title} />
+      <PageHeader title={title} eyebrow={eyebrow} />
       <div className="flex flex-col gap-8">
         <DrawDataStatus data={data} />
 
@@ -163,7 +164,13 @@ export default function Draws() {
           >
             <DateInput value={query} onChange={setQuery} min={GAME_START[game]} max={today} />
           </Field>
-          <Button type="submit" variant="primary" icon={<Search />} disabled={!query} className="self-start">
+          <Button
+            type="submit"
+            variant={query ? "primary" : "secondary"}
+            icon={<Search />}
+            disabled={!query}
+            className="self-start"
+          >
             {t("draws.search.cta")}
           </Button>
         </form>

@@ -47,7 +47,6 @@
 
   /* layout */
   --topbar-h: 56px;
-  --gameswitch-h: 52px;
   --bottomnav-h: 64px;
   --sidebar-w: 240px;
   --content-max: 960px;
@@ -88,6 +87,8 @@
   --font-sans: "Manrope Variable", "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Type scale 13 / 16 / 20 / 28 / 40 px (§5.2). Body text never below 16 px. */
+  --text-nav: 0.75rem; /* bottom navigation labels only, below the 13 px caption step */
+  --text-nav--line-height: 1rem;
   --text-caption: 0.8125rem;
   --text-caption--line-height: 1.25rem;
   --text-body: 1rem;
@@ -135,7 +136,7 @@
     text-size-adjust: 100%;
     overscroll-behavior: none; /* app shell: no pull-to-refresh hijacking */
     /* sticky bars must not hide the focused element (WCAG 2.4.11) */
-    scroll-padding-top: calc(var(--topbar-h) + var(--gameswitch-h) + var(--safe-top) + 8px);
+    scroll-padding-top: calc(var(--topbar-h) + var(--safe-top) + 8px);
     scroll-padding-bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + 8px);
   }
 
