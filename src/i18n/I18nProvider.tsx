@@ -11,6 +11,7 @@ import ru from "./ru.json";
 import { interpolate, pickPlural, type Dict, type Lang } from "./format";
 import { toast } from "@/components/ui/toastStore";
 import { I18nContext, type I18n } from "./context";
+import { cachedNamespace, loadNamespaceDict, type Namespace } from "./namespaces";
 
 const STORAGE_KEY = "llg.lang";
 const LOCALES: Record<Lang, string> = { ru: "ru-RU", en: "en-GB", de: "de-DE" };
@@ -37,6 +38,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   // The language whose dictionary is shown. <html lang> and number formats follow it, so they
   // never run ahead of the texts (QA B16).
   const [shown, setShown] = useState<Lang>("ru");
+  // On-demand dictionaries (guide, coach) of the shown language.
+  const [extra, setExtra] = useState<{ lang: Lang; dicts: Partial<Record<Namespace, Dict>> }>({ lang: "ru", dicts: {} });
 
   useEffect(() => {
     let alive = true;
@@ -71,9 +74,27 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const loadNamespace = useCallback(
+    (ns: Namespace) => {
+      const lang = shown;
+      const have = (cur: typeof extra) => cur.lang === lang && cur.dicts[ns] !== undefined;
+      const ready = cachedNamespace(ns, lang);
+      const put = (d: Dict) =>
+        setExtra((cur) => (have(cur) ? cur : { lang, dicts: { ...(cur.lang === lang ? cur.dicts : {}), [ns]: d } }));
+      if (ready) put(ready);
+      else
+        loadNamespaceDict(ns, lang).then(put, () => {
+          /* offline on a first visit: the screen keeps its skeleton */
+        });
+    },
+    [shown],
+  );
+
   const value = useMemo<I18n>(() => {
     const locale = LOCALES[shown];
-    const lookup = (key: string) => dict[key] ?? (ru as Dict)[key] ?? key;
+    const namespaces = extra.lang === shown ? extra.dicts : {};
+    const merged: Dict = Object.assign({}, ...Object.values(namespaces));
+    const lookup = (key: string) => dict[key] ?? merged[key] ?? (ru as Dict)[key] ?? key;
     const nf = (o?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale, o);
     return {
       lang: shown,
@@ -84,7 +105,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         const k = key.endsWith(".plural") ? key : `${key}.plural`;
         return interpolate(pickPlural(lookup(k), n, locale), { n: nf().format(n), ...params });
       },
-      has: (key) => key in dict || key in (ru as Dict),
+      has: (key) => key in dict || key in merged || key in (ru as Dict),
+      loadNamespace,
+      hasNamespace: (ns) => namespaces[ns] !== undefined,
       num: (v, o) => nf(o).format(v),
       money: (v) => nf({ style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v),
       percent: (f, digits = 2) =>
@@ -103,7 +126,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       weekday: (iso) =>
         new Intl.DateTimeFormat(locale, { timeZone: "UTC", weekday: "short" }).format(new Date(`${iso}T00:00:00Z`)),
     };
-  }, [dict, shown, setLang]);
+  }, [dict, shown, setLang, extra, loadNamespace]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

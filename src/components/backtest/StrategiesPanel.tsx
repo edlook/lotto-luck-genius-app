@@ -4,6 +4,8 @@ import { Card, Section } from "@/components/ui";
 import { Disclosure } from "@/components/common/Disclosure";
 import { useI18n } from "@/i18n/context";
 import { useAnalysis } from "@/hooks/useAnalysis";
+import { useHints } from "@/hooks/useHints";
+import { Hint } from "@/components/hints/Hint";
 import { STRATEGY_ORDER, WARMUP, DEFAULT_RANDOM_RUNS, type BacktestResult, type StrategyId } from "@/lib/backtest";
 import { GAMES, type GameId } from "@/lib/games";
 import type { Draw } from "@/lib/ticketCheck";
@@ -21,6 +23,11 @@ export function StrategiesPanel({ game, draws }: { game: GameId; draws: Draw[] }
   const job = useAnalysis("backtest", key);
   const mains = useMemo(() => draws.map((d) => d.main), [draws]);
   const result: BacktestResult | undefined = job.result;
+  const hints = useHints("backtest", () => ({
+    game,
+    strategiesNone: result !== undefined && result.strategies.every((s) => s.id === "random" || s.within),
+    popularity: null,
+  }));
 
   const n3 = (v: number) => num(v, fixed(3));
   const name = (id: StrategyId) => t(`backtest.strategy.${id}.name`);
@@ -44,6 +51,8 @@ export function StrategiesPanel({ game, draws }: { game: GameId; draws: Draw[] }
         </Card>
         <RunControl state={job} onRun={() => job.start({ draws: mains, pool, k })} />
       </div>
+
+      <Hint control={hints} />
 
       {result ? <Results result={result} game={game} draws={draws} /> : null}
 

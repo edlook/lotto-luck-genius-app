@@ -148,6 +148,10 @@ export default function About() {
           {["p1", "p2", "p3", "p4"].map((p) => (
             <P key={p} k={`about.principles.${p}`} />
           ))}
+          <p className="max-w-prose text-body text-muted-foreground">{t("about.guide.intro")}</p>
+          <ButtonLink to="/guide" variant="secondary" className="self-start">
+            {t("nav.guide")}
+          </ButtonLink>
         </Block>
 
         <Block id="generator" title={t("about.generator.title")}>

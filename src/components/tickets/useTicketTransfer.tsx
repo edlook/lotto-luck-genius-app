@@ -5,6 +5,7 @@ import { downloadText } from "@/lib/download";
 import { berlinNow } from "@/lib/drawCalendar";
 import { useLocalStore } from "@/lib/storage/localStore";
 import { analyzeTicketImport, exportTickets, ticketsStore, type Ticket } from "@/lib/storage/stores";
+import { lastExportStore } from "@/lib/storage/onboarding";
 import { mergeImportedTickets } from "@/lib/ticketSummary";
 import { writeTickets } from "./writeTickets";
 
@@ -40,6 +41,8 @@ export function useTicketTransfer(): TicketTransfer {
   const exportAll = () => {
     const list = ticketsStore.get();
     downloadText(`lotto-luck-genius-tickets-${berlinNow().date}.json`, exportTickets(list));
+    // The "back up your tickets" tip counts from here.
+    lastExportStore.set(new Date().toISOString());
     toast.success(t("tickets.export.done", { n: list.length }));
   };
 

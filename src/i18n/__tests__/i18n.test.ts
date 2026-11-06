@@ -5,6 +5,9 @@ import de from "../de.json";
 import guideRu from "../guide/ru.json";
 import guideEn from "../guide/en.json";
 import guideDe from "../guide/de.json";
+import coachRu from "../coach/ru.json";
+import coachEn from "../coach/en.json";
+import coachDe from "../coach/de.json";
 import { interpolate, pickPlural } from "../format";
 
 type Dict = Record<string, string>;
@@ -12,7 +15,13 @@ type Dict = Record<string, string>;
 const SETS: [string, Dict, Dict, Dict][] = [
   ["app", ru, en, de],
   ["guide", guideRu, guideEn, guideDe],
+  ["coach", coachRu, coachEn, coachDe],
 ];
+const PREFIX: Record<string, RegExp> = {
+  app: /^(?!guide\.|tour\.|hint\.|settings\.hints\.)/,
+  guide: /^guide\./,
+  coach: /^(tour\.|hint\.|settings\.hints\.)/,
+};
 
 describe.each(SETS)("dictionaries (%s)", (_name, dru, den, dde) => {
   it("have identical keys in all languages and no empty values", () => {
@@ -41,8 +50,8 @@ describe.each(SETS)("dictionaries (%s)", (_name, dru, den, dde) => {
     expect(Object.values(dde).join(" ").toLowerCase()).not.toMatch(/garantiert|erhöht (ihre|die) (gewinn)?chance/);
   });
 
-  it("keep the guide namespace out of the app dictionaries", () => {
-    expect(Object.keys(dru).every((k) => k.startsWith("guide.") === (_name === "guide"))).toBe(true);
+  it("keep every namespace to its own keys", () => {
+    expect(Object.keys(dru).every((k) => PREFIX[_name]!.test(k))).toBe(true);
   });
 });
 

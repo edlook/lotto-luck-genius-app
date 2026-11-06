@@ -4,8 +4,11 @@
  * (tables `| key | RU | EN | DE |`). Keys must be identical in all three languages; duplicate
  * keys (also across the two files) abort the build.
  *
- * - src/i18n/{ru,en,de}.json         every key except `guide.*` (loaded with the app shell)
- * - src/i18n/guide/{ru,en,de}.json   the `guide.*` keys: the /guide page only, loaded with its chunk
+ * - src/i18n/{ru,en,de}.json          the keys the app shell needs at once
+ * - src/i18n/guide/{ru,en,de}.json    `guide.*`: the /guide page only
+ * - src/i18n/coach/{ru,en,de}.json    `tour.*`, `hint.*`, `settings.hints.*`: the tour and the tips
+ *   The two namespaces are fetched on demand (useNamespace in src/i18n/context.ts), so they stay
+ *   out of the first chunk.
  *
  * Only table rows with a dotted key are read; list items such as the "could not verify" section
  * of guide-copy.md never reach the dictionaries.
@@ -22,7 +25,12 @@ const sources = process.argv.length > 2
   : [path.join(root, "..", "texts", "site-copy.md"), path.join(root, "..", "texts", "guide-copy.md")];
 
 const dicts = { ru: {}, en: {}, de: {} };
-const guide = { ru: {}, en: {}, de: {} };
+/** Namespaces loaded on demand: [name, test on the key]. */
+const NAMESPACES = [
+  ["guide", (key) => key.startsWith("guide.")],
+  ["coach", (key) => /^(tour|hint)\./.test(key) || key.startsWith("settings.hints.")],
+];
+const spaces = Object.fromEntries(NAMESPACES.map(([name]) => [name, { ru: {}, en: {}, de: {} }]));
 const seen = new Set();
 const KEY = /^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)+$/;
 
@@ -43,7 +51,8 @@ for (const line of md.split(/\r?\n/)) {
   // Copy deck §0: numbers must not break across lines. Digit-group spaces ("139 838 160")
   // and the space before € / % become non-breaking.
   const nb = (v) => v.replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u00A0").replace(/(\d) (?=[€%])/g, "$1\u00A0");
-  const target = key.startsWith("guide.") ? guide : dicts;
+  const ns = NAMESPACES.find(([, test]) => test(key));
+  const target = ns ? spaces[ns[0]] : dicts;
   target.ru[key] = nb(ru);
   target.en[key] = nb(en);
   target.de[key] = nb(de);
@@ -51,11 +60,15 @@ for (const line of md.split(/\r?\n/)) {
 }
 
 const outDir = path.join(root, "src", "i18n");
-await mkdir(path.join(outDir, "guide"), { recursive: true });
 for (const [lang, dict] of Object.entries(dicts)) {
   await writeFile(path.join(outDir, `${lang}.json`), JSON.stringify(dict, null, 2) + "\n");
 }
-for (const [lang, dict] of Object.entries(guide)) {
-  await writeFile(path.join(outDir, "guide", `${lang}.json`), JSON.stringify(dict, null, 2) + "\n");
+for (const [name] of NAMESPACES) {
+  await mkdir(path.join(outDir, name), { recursive: true });
+  for (const [lang, dict] of Object.entries(spaces[name])) {
+    await writeFile(path.join(outDir, name, `${lang}.json`), JSON.stringify(dict, null, 2) + "\n");
+  }
 }
-console.log(`Keys: ${Object.keys(dicts.ru).length} + guide ${Object.keys(guide.ru).length}`);
+console.log(
+  `Keys: ${Object.keys(dicts.ru).length}` + NAMESPACES.map(([name]) => `, ${name} ${Object.keys(spaces[name].ru).length}`).join(""),
+);

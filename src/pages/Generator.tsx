@@ -1,5 +1,5 @@
 import { useId, useMemo, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Copy, Dices, Eraser, RefreshCw, SearchCheck } from "lucide-react";
 import {
   Ball,
@@ -20,14 +20,20 @@ import { NumberPicker } from "@/components/common/NumberPicker";
 import { PopularityBadge, PopularityRules } from "@/components/common/PopularityReport";
 import { focusLater } from "@/components/common/focus";
 import { SaveTicketPanel } from "@/components/tickets/SaveTicketPanel";
+import { Hint } from "@/components/hints/Hint";
 import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useHints } from "@/hooks/useHints";
 import { GAMES, type GameId } from "@/lib/games";
 import { fieldToText, generateField, generateFields, GenerationError, type GeneratorMode } from "@/lib/generator";
 import { evaluatePopularity, type PastWinningIndex } from "@/lib/popularity";
+import { applyChanges, NO_SUGGESTIONS, suggestAll, type EvaluateSuggestions } from "@/lib/hintChanges";
+import { useLocalStore } from "@/lib/storage/localStore";
+import { hintsUsageStore, markUsed } from "@/lib/storage/onboarding";
+import { oddsStore, ticketsStore } from "@/lib/storage/stores";
 import { generatorSession, type Generated } from "./generatorSession";
 
 const MAX_FIELDS = 12;
@@ -49,8 +55,14 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
   const resultsRef = useRef<HTMLDivElement>(null);
   const modeId = useId();
   const big = useMediaQuery("(min-width: 40rem)");
+  const navigate = useNavigate();
   const cfg = GAMES[game];
   const current = results.get(game) ?? null;
+  const tickets = useLocalStore(ticketsStore);
+  const usage = useLocalStore(hintsUsageStore);
+  // Tips: the user has just chosen "Purely random" / the shown set was saved as a ticket.
+  const [switchedToRandom, setSwitchedToRandom] = useState(false);
+  const [saved, setSaved] = useState<{ run: number; ticketId: string; withoutSuperzahl: boolean } | null>(null);
 
   // Reports are recomputed when the draw archive arrives, so "past winning" is never stale.
   const reports = useMemo(
@@ -60,6 +72,23 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
 
   const store = (fields: Generated["fields"]) => setResults(generatorSession.save(game, fields));
 
+  const popularIndex = reports.findIndex((r) => r.level === "high");
+  const savedHere = current !== null && saved?.run === current.run ? saved : null;
+  const hints = useHints("generator", () => ({
+    game,
+    mode,
+    fieldCount: count ?? 1,
+    hasResult: current !== null,
+    resultSaved: savedHere !== null,
+    generatedBefore: usage.generated,
+    ticketCount: tickets.length,
+    popularField:
+      popularIndex >= 0 && current ? { index: popularIndex, key: current.fields[popularIndex]!.main.join("-") } : null,
+    switchedToRandom,
+    justSaved: savedHere ? { ticketId: savedHere.ticketId, withoutSuperzahl: savedHere.withoutSuperzahl } : null,
+    szSaves: usage.szSaves,
+  }));
+
   const generate = () => {
     const n = Math.min(MAX_FIELDS, Math.max(1, count ?? 1));
     try {
@@ -67,6 +96,8 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
         euro ? { main, euro } : { main },
       );
       store(fields);
+      markUsed("generated");
+      setSwitchedToRandom(false);
       // Bring the result into view without taking focus away from the button ("generate again").
       window.requestAnimationFrame(() =>
         resultsRef.current?.scrollIntoView({
@@ -99,6 +130,21 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
 
   return (
     <div className="flex flex-col gap-5">
+      <Hint
+        control={hints}
+        onAction={(a) => {
+          if (a.id === "replaceField" && a.n !== undefined) replace(a.n);
+          else if (a.id === "enableRare") {
+            generatorSession.setMode("rare");
+            setMode("rare");
+            setSwitchedToRandom(false);
+          } else if (a.id === "openYear" && a.n !== undefined) {
+            // The yearly calculator opens with this number of fields, two draws a week, 52 weeks.
+            oddsStore.set((s) => ({ ...s, year: { fieldsPerDraw: a.n!, drawsPerWeek: 2, weeks: 52 } }));
+            void navigate("/odds#year");
+          } else if (a.id === "saveSet") document.getElementById("generator-save")?.click();
+        }}
+      />
       <Card className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
           <div className="flex flex-col gap-2">
@@ -115,6 +161,7 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
               onChange={(m) => {
                 generatorSession.setMode(m);
                 setMode(m);
+                setSwitchedToRandom(m === "random");
               }}
               block
               className="[&>button]:py-1.5 [&>button]:leading-5 [&>button]:whitespace-normal"
@@ -217,6 +264,12 @@ function GenerateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
               source="generator"
               label={t("generator.result.save")}
               variant="primary"
+              buttonId="generator-save"
+              onSaved={(ticket) => {
+                const withoutSuperzahl = game === "649" && (ticket.superzahl === null || ticket.superzahl === undefined);
+                setSaved({ run: current.run, ticketId: ticket.id, withoutSuperzahl });
+                if (withoutSuperzahl) hintsUsageStore.set((u) => ({ ...u, szSaves: u.szSaves + 1 }));
+              }}
             />
             <p className="text-caption text-muted-foreground">
               {t(cfg.extraCount ? "generator.result.euroNote" : "generator.result.szNote")}
@@ -257,6 +310,8 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
   const [main, setMain] = useState<number[]>([]);
   const [euro, setEuro] = useState<number[]>([]);
   const [evaluated, setEvaluated] = useState<string | null>(null);
+  // Replacements for the evaluated combination, prepared once per "Evaluate" (the pick is random).
+  const [suggestions, setSuggestions] = useState<EvaluateSuggestions>(NO_SUGGESTIONS);
   const reportRef = useRef<HTMLHeadingElement>(null);
 
   // Reset the selection when the game changes (pools differ), adjusted during render.
@@ -266,6 +321,7 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
     setMain([]);
     setEuro([]);
     setEvaluated(null);
+    setSuggestions(NO_SUGGESTIONS);
   }
 
   const complete = main.length === cfg.mainCount && euro.length === cfg.extraCount;
@@ -275,9 +331,23 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
     () => (showReport ? evaluatePopularity(game, main, { pastWinning }) : null),
     [showReport, game, main, pastWinning],
   );
+  const hints = useHints("evaluate", () => ({ report, comboKey: key, suggestions }));
+
+  const runEvaluation = (nextMain: number[]) => {
+    setMain(nextMain);
+    setEvaluated(`${nextMain.join("-")}|${euro.join("-")}`);
+    setSuggestions(suggestAll(game, nextMain, pastWinning));
+  };
 
   return (
     <div className="flex flex-col gap-5">
+      <Hint
+        control={hints}
+        onAction={(a) => {
+          if (a.id === "applyChanges" && a.changes) runEvaluation(applyChanges(main, a.changes));
+          else if (a.id === "saveEvaluated") document.getElementById("evaluate-save")?.click();
+        }}
+      />
       <div className="flex flex-col gap-5 lg:rounded-lg lg:border lg:border-border lg:bg-card lg:p-5">
         <NumberPicker
           label={t("evaluate.grid.label.main", { min: 1, max: cfg.mainPool })}
@@ -305,6 +375,7 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
             className="flex-1 sm:flex-none"
             onClick={() => {
               setEvaluated(key);
+              setSuggestions(suggestAll(game, main, pastWinning));
               focusLater(() => reportRef.current);
             }}
           >
@@ -319,6 +390,7 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
               setMain([]);
               setEuro([]);
               setEvaluated(null);
+              setSuggestions(NO_SUGGESTIONS);
             }}
           >
             {t("evaluate.clear")}
@@ -347,6 +419,7 @@ function EvaluateTab({ game, pastWinning }: { game: GameId; pastWinning: PastWin
             fields={[cfg.extraCount ? { main, euro } : { main }]}
             source="manual"
             label={t("evaluate.report.save")}
+            buttonId="evaluate-save"
           />
         </Card>
       ) : (

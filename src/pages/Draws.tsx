@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { CalendarDays, ChevronRight, Search, Ticket as TicketIcon } from "lucide-react";
 import {
@@ -15,16 +15,19 @@ import {
 } from "@/components/ui";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DrawDataStatus } from "@/components/common/DrawDataStatus";
+import { Hint } from "@/components/hints/Hint";
 import { focusLater } from "@/components/common/focus";
 import { DateInput } from "@/components/tickets/TicketEditor";
 import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useHints } from "@/hooks/useHints";
 import { GAME_START, berlinNow } from "@/lib/drawCalendar";
 import { eraDividerBetween, ticketDates } from "@/lib/drawsView";
 import { useLocalStore } from "@/lib/storage/localStore";
 import { ticketsStore } from "@/lib/storage/stores";
+import { hintsUsageStore, markUsed } from "@/lib/storage/onboarding";
 import type { Draw } from "@/lib/ticketCheck";
 
 const PAGE = 50;
@@ -54,6 +57,21 @@ export default function Draws() {
   const tickets = useLocalStore(ticketsStore);
   const navigate = useNavigate();
   usePageMeta("draws");
+  // "Open any draw" is shown on the first visit only: read before this visit marks itself.
+  const [firstVisit] = useState(() => !hintsUsageStore.get().drawsVisited);
+  // Only a visit with tickets counts: the tip talks about "your tickets for that date".
+  const hasTickets = tickets.length > 0;
+  useEffect(() => {
+    if (hasTickets) markUsed("drawsVisited");
+  }, [hasTickets]);
+  const hints = useHints("draws", () => ({
+    game,
+    today: berlinNow().date,
+    lastArchiveDate: data.lastDate,
+    archiveReady: !data.isLoading && !data.isError && data.draws.length > 0,
+    firstVisit,
+    totalTickets: tickets.length,
+  }));
   const [shown, setShown] = useState(PAGE);
   const [query, setQuery] = useState("");
 
@@ -128,6 +146,7 @@ export default function Draws() {
     <>
       <PageHeader title={title} eyebrow={eyebrow} />
       <div className="flex flex-col gap-8">
+        <Hint control={hints} />
         <DrawDataStatus data={data} />
 
         {latest ? (

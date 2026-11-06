@@ -15,10 +15,13 @@
 import { GAMES, type GameId } from "./games";
 import { addDays, isDrawDay, toDate } from "./drawCalendar";
 import { EJ_JACKPOT_CAP } from "./ev";
-import { formatChanges, type Change } from "./hintChanges";
+import { formatChanges, type Change, type EvaluateSuggestions } from "./hintChanges";
 import type { PopularityReport } from "./popularity";
 import type { Ticket } from "./storage/validate";
 import type { TicketEvaluation } from "./ticketStatus";
+import type { HintRecord, HintsState } from "./hintsState";
+
+export { parseHintsState, parseHintsUsage, EMPTY_USAGE, type HintRecord, type HintsState, type HintsUsage } from "./hintsState";
 
 /* ---------- catalogue (table 7.2, in table order) ---------- */
 
@@ -95,8 +98,10 @@ export interface HintAction {
   id?: HintActionId;
   /** Ticket the action is about. */
   ticketId?: string;
-  /** Number the action is about (field number, count of fields). */
+  /** Number the action is about (field index, count of fields). */
   n?: number;
+  /** Replacements to apply ("applyChanges"). */
+  changes?: Change[];
 }
 
 /** How the `Hint` component formats a raw parameter before it goes into the text. */
@@ -289,15 +294,6 @@ export function generatorHints(i: GeneratorHintInput): HintCandidate[] {
 
 /* ---------- Check yours ---------- */
 
-/** Replacements prepared for the combination on screen (null = none found). */
-export interface EvaluateSuggestions {
-  dates: Change[] | null;
-  progression: Change[] | null;
-  ticketPattern: Change[] | null;
-  pastWinning: Change[] | null;
-  medium: Change[] | null;
-}
-
 export interface EvaluateHintInput {
   /** Report of the evaluated, complete combination; null before "Evaluate" was pressed. */
   report: PopularityReport | null;
@@ -311,14 +307,13 @@ export function evaluateHints(i: EvaluateHintInput): HintCandidate[] {
   if (!r) return [];
   const out: HintCandidate[] = [];
   const rule = (id: string) => r.rules.find((x) => x.id === id && x.status === "triggered");
-  const apply: HintAction[] = [{ labelKey: "hint.eval.apply", id: "applyChanges" }];
   const fix = (id: HintId, changes: Change[], params: Record<string, string | number>, format: Record<string, ParamFormat> = {}) =>
     out.push(
       make(id, {
         ctx: i.comboKey,
         params: { ...params, changes: formatChanges(changes) },
         format,
-        actions: apply,
+        actions: [{ labelKey: "hint.eval.apply", id: "applyChanges", changes }],
         dismissKey: "hint.eval.keep",
       }),
     );
@@ -641,29 +636,6 @@ export function candidatesFor<S extends HintScreen>(screen: S, input: HintInputs
 
 /* ---------- dismissal state (`llg.hints.v1`) ---------- */
 
-export interface HintRecord {
-  /** ISO time until which the tip stays hidden. */
-  until?: string;
-  forever?: true;
-  ctx?: string;
-}
-export type HintsState = Record<string, HintRecord>;
-
-export function parseHintsState(raw: unknown): HintsState {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return {};
-  const out: HintsState = {};
-  for (const [key, v] of Object.entries(raw)) {
-    if (typeof v !== "object" || v === null || Array.isArray(v)) continue;
-    const r = v as Record<string, unknown>;
-    const rec: HintRecord = {};
-    if (r.forever === true) rec.forever = true;
-    if (typeof r.until === "string" && !Number.isNaN(Date.parse(r.until))) rec.until = r.until;
-    if (typeof r.ctx === "string") rec.ctx = r.ctx;
-    if (rec.forever || rec.until) out[key] = rec;
-  }
-  return out;
-}
-
 /** A tip is hidden after "Got it" while the time has not run out and its context is unchanged. */
 export function isHidden(state: HintsState, c: Pick<HintCandidate, "key" | "ctx">, now: number): boolean {
   const rec = state[c.key];
@@ -710,27 +682,4 @@ export function pickHint(candidates: readonly HintCandidate[], ctx: SelectContex
   const visible = candidates.filter((c) => !isHidden(ctx.state, c, ctx.now));
   visible.sort((a, b) => a.priority - b.priority || a.order - b.order);
   return visible[0] ?? null;
-}
-
-/* ---------- usage counters (`llg.hints.usage.v1`) ---------- */
-
-export interface HintsUsage {
-  /** "Generate" pressed at least once. */
-  generated: boolean;
-  /** Saves of a 6aus49 set without Superzahl (the Superzahl tip is shown for the first three). */
-  szSaves: number;
-  /** The draws screen was opened before. */
-  drawsVisited: boolean;
-}
-
-export const EMPTY_USAGE: HintsUsage = { generated: false, szSaves: 0, drawsVisited: false };
-
-export function parseHintsUsage(raw: unknown): HintsUsage {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return EMPTY_USAGE;
-  const r = raw as Record<string, unknown>;
-  return {
-    generated: r.generated === true,
-    szSaves: typeof r.szSaves === "number" && Number.isInteger(r.szSaves) && r.szSaves >= 0 ? r.szSaves : 0,
-    drawsVisited: r.drawsVisited === true,
-  };
 }

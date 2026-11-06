@@ -20,7 +20,6 @@ import {
   pickHint,
   statsHints,
   ticketsHints,
-  type EvaluateSuggestions,
   type GeneratorHintInput,
   type HintCandidate,
   type HintId,
@@ -28,6 +27,7 @@ import {
   type TicketsHintInput,
 } from "../hints";
 import { evaluatePopularity, comboKey } from "../popularity";
+import type { EvaluateSuggestions } from "../hintChanges";
 import { evaluateTicket } from "../ticketStatus";
 import type { Draw } from "../ticketCheck";
 import type { Ticket } from "../storage/validate";

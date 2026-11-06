@@ -25,6 +25,23 @@ const RANK: Record<PopularityLevel, number> = { low: 0, medium: 1, high: 2 };
 /** Numbers above this value are not birthdays. */
 const CALENDAR_MAX = 31;
 
+/** Replacements prepared for the combination on screen (null = none found or the rule does not apply). */
+export interface EvaluateSuggestions {
+  dates: Change[] | null;
+  progression: Change[] | null;
+  ticketPattern: Change[] | null;
+  pastWinning: Change[] | null;
+  medium: Change[] | null;
+}
+
+export const NO_SUGGESTIONS: EvaluateSuggestions = {
+  dates: null,
+  progression: null,
+  ticketPattern: null,
+  pastWinning: null,
+  medium: null,
+};
+
 /** Applies replacements to a combination (sorted result). */
 export function applyChanges(main: readonly number[], changes: readonly Change[]): number[] {
   const map = new Map(changes.map((c) => [c.from, c.to]));
@@ -93,4 +110,20 @@ export function suggestChanges(
     return [...pick.changes].sort((x, y) => x.from - y.from);
   }
   return null;
+}
+
+/** Suggestions for every rule that applies to the combination (called once per "Evaluate"). */
+export function suggestAll(
+  game: GameConfig | GameId,
+  main: readonly number[],
+  pastWinning: PastWinningIndex | null,
+  rnd: RandomInt = randomInt,
+): EvaluateSuggestions {
+  return {
+    dates: suggestChanges(game, main, "dates", pastWinning, rnd),
+    progression: suggestChanges(game, main, "progression", pastWinning, rnd),
+    ticketPattern: suggestChanges(game, main, "ticketPattern", pastWinning, rnd),
+    pastWinning: suggestChanges(game, main, "pastWinning", pastWinning, rnd),
+    medium: suggestChanges(game, main, "medium", pastWinning, rnd),
+  };
 }

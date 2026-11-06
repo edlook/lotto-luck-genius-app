@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type FormEvent } from "react";
-import { Download, FileUp, RefreshCw, Save, Trash2, Upload } from "lucide-react";
+import { Download, FileUp, GraduationCap, RefreshCw, RotateCcw, Save, Trash2, Upload } from "lucide-react";
 import {
   Button,
   Field,
@@ -20,7 +20,7 @@ import { focusLater } from "@/components/common/focus";
 import { DateInput } from "@/components/tickets/TicketEditor";
 import { useTicketTransfer } from "@/components/tickets/useTicketTransfer";
 import { writeTickets } from "@/components/tickets/writeTickets";
-import { useI18n } from "@/i18n/context";
+import { useI18n, useNamespace } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -30,6 +30,8 @@ import { euroPoolOn } from "@/lib/eras";
 import { parseDrawCsv, type RowError } from "@/lib/csvImport";
 import { useLocalStore, type WriteResult } from "@/lib/storage/localStore";
 import { ticketsStore, userDrawsStore } from "@/lib/storage/stores";
+import { hintsEnabledStore, hintsStore } from "@/lib/storage/onboarding";
+import { tourRequest } from "@/lib/hintsRuntime";
 import { addUserDraws, manualDrawError, manualToDraw, planDrawImport, type ManualDrawError } from "@/lib/userDrawOps";
 import { APP_VERSION } from "@/lib/version";
 import type { Draw } from "@/lib/ticketCheck";
@@ -334,6 +336,57 @@ function ManualDraw() {
   );
 }
 
+/* ---------- tour and tips ---------- */
+
+function HintsBlock() {
+  const { t } = useI18n();
+  const enabled = useLocalStore(hintsEnabledStore);
+  const toggleId = useId();
+  const ready = useNamespace("coach");
+  if (!ready) return null;
+  return (
+    <Section id="hints" title={t("settings.hints.title")} card className="scroll-mt-40 lg:scroll-mt-8">
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-1">
+          <label htmlFor={toggleId} className="flex min-h-11 cursor-pointer items-center gap-3 font-semibold">
+            <input
+              id={toggleId}
+              type="checkbox"
+              role="switch"
+              checked={enabled}
+              aria-describedby={`${toggleId}-help`}
+              onChange={(e) => hintsEnabledStore.set(e.target.checked)}
+              className="size-6 shrink-0 accent-primary"
+            />
+            {t("settings.hints.toggle")}
+          </label>
+          <p id={`${toggleId}-help`} className="pl-9 text-caption text-muted-foreground">
+            {t("settings.hints.help")}
+          </p>
+        </div>
+        <div className="flex flex-col items-start gap-1">
+          <Button
+            variant="secondary"
+            icon={<RotateCcw />}
+            onClick={() => {
+              hintsStore.set({});
+              toast.success(t("settings.hints.reset.done"));
+            }}
+          >
+            {t("settings.hints.reset")}
+          </Button>
+        </div>
+        <div className="flex flex-col items-start gap-1">
+          <Button variant="secondary" icon={<GraduationCap />} onClick={() => tourRequest.set(true)}>
+            {t("tour.restart")}
+          </Button>
+          <p className="text-caption text-muted-foreground">{t("tour.restart.help")}</p>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 /* ---------- page ---------- */
 
 export default function Settings() {
@@ -400,6 +453,7 @@ export default function Settings() {
           </div>
         </div>
 
+        <HintsBlock />
         <ImportBlock />
         <ManualDraw />
 

@@ -4,13 +4,16 @@ import { RotateCcw } from "lucide-react";
 import { Button, Card, Field, NumberInput, Section, SegmentedControl, Skeleton, SkeletonGroup } from "@/components/ui";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { HonestyNote } from "@/components/common/HonestyNote";
+import { Hint } from "@/components/hints/Hint";
 import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useArchive } from "@/hooks/useArchive";
+import { useDraws } from "@/hooks/useDraws";
+import { useHints } from "@/hooks/useHints";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { GAMES, type GameId } from "@/lib/games";
 import { anyWin, classOdds, totalCombinations } from "@/lib/odds";
-import { fieldEv, yearCost } from "@/lib/ev";
+import { ejFieldEvAtJackpot, fieldEv, yearCost } from "@/lib/ev";
 import { useLocalStore } from "@/lib/storage/localStore";
 import { oddsStore, type OddsSettings } from "@/lib/storage/stores";
 
@@ -132,6 +135,27 @@ function Calculators({ game }: { game: GameId }) {
 
   const setYear = (p: Partial<typeof year>) => patch((s) => ({ ...s, year: { ...year, ...p } }));
 
+  // Tips: what the year costs, and what a field is worth at the latest jackpot (EuroJackpot only;
+  // the Lotto 6 aus 49 archive has neither jackpots nor quotas).
+  const ej = useDraws("ej", game === "ej");
+  const latest = ej.draws[ej.draws.length - 1];
+  const openJackpot = game === "ej" && latest?.quotes?.[0]?.[1] === 0 && latest.jackpot ? latest.jackpot : null;
+  const jackpotEv = openJackpot ? ejFieldEvAtJackpot(ej.draws, openJackpot) : null;
+  const hints = useHints("odds", () => ({
+    game,
+    year:
+      y.expectedReturn !== null && y.expectedLoss !== null
+        ? {
+            spent: y.spent,
+            back: y.expectedReturn,
+            loss: y.expectedLoss,
+            signature: [year.fieldsPerDraw, year.drawsPerWeek, year.weeks, price, fee, share].join(":"),
+          }
+        : null,
+    jackpot:
+      jackpotEv && latest ? { amount: jackpotEv.jackpot, ev: jackpotEv.ev, price: jackpotEv.price, drawDate: latest.date } : null,
+  }));
+
   return (
     <>
       <Section title={t("odds.ev.title")} card>
@@ -224,7 +248,7 @@ function Calculators({ game }: { game: GameId }) {
         </div>
       </Section>
 
-      <Section title={t("odds.year.title")} card>
+      <Section id="year" title={t("odds.year.title")} card className="scroll-mt-40 lg:scroll-mt-8">
         <div className="flex flex-col gap-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <Field
@@ -305,6 +329,8 @@ function Calculators({ game }: { game: GameId }) {
           <p className="text-caption text-muted-foreground">{t("odds.year.note")}</p>
         </div>
       </Section>
+
+      <Hint control={hints} />
     </>
   );
 }

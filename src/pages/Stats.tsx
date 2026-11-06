@@ -10,7 +10,9 @@ import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useUniformityTest } from "@/hooks/useUniformityTest";
+import { useUniformityTest, type TestState } from "@/hooks/useUniformityTest";
+import { useHints } from "@/hooks/useHints";
+import { Hint } from "@/components/hints/Hint";
 import { GAMES } from "@/lib/games";
 import { CURRENT_EJ_ERA, EJ_ERAS } from "@/lib/eras";
 import {
@@ -37,9 +39,8 @@ const P_ALERT = 0.01;
 const selectClass =
   "h-12 w-full rounded-md border border-border-strong bg-background px-3 text-[16px] text-foreground sm:w-auto";
 
-function UniformityBlock({ observed, draws, k, pool }: { observed: number[]; draws: number; k: number; pool: number }) {
+function UniformityBlock({ test, draws }: { test: TestState; draws: number }) {
   const { t, num } = useI18n();
-  const test = useUniformityTest(observed, draws, k, pool);
   const p = (v: number) => num(v, { maximumFractionDigits: v < 0.01 ? 4 : 3 });
   return (
     <Card as="section" aria-labelledby="stats-test" className="flex flex-col gap-3">
@@ -116,6 +117,16 @@ export default function Stats() {
     [inPeriod, cfg],
   );
   const observed = useMemo(() => mainRows.map((r) => r.observed), [mainRows]);
+  // The test runs here (not inside its block) so the tip about a low p-value can read the result.
+  const test = useUniformityTest(observed, n, cfg.mainCount, cfg.mainPool);
+  // The tip about frequencies follows after the table was sorted by frequency in this visit.
+  const [sortedByFrequency, setSortedByFrequency] = useState(false);
+  const hints = useHints("stats", () => ({
+    game,
+    period,
+    sortedByFrequency,
+    pValue: test.status === "done" && test.result ? test.result.pValue : null,
+  }));
 
   const era = EJ_ERAS.find((e) => e.id === eraId) ?? CURRENT_EJ_ERA;
   const euroDraws = useMemo(() => (game === "ej" ? drawsInEra(inPeriod, era.id) : []), [game, inPeriod, era.id]);
@@ -212,10 +223,14 @@ export default function Stats() {
           </p>
         </div>
 
-        <UniformityBlock observed={observed} draws={n} k={cfg.mainCount} pool={cfg.mainPool} />
+        <UniformityBlock test={test} draws={n} />
 
         <Section title={t("stats.freq.main.title")}>
-          <FrequencyChart rows={mainRows} band={typicalBand(n, cfg.mainCount, cfg.mainPool)} />
+          <FrequencyChart
+            rows={mainRows}
+            band={typicalBand(n, cfg.mainCount, cfg.mainPool)}
+            onSortByFrequency={() => setSortedByFrequency(true)}
+          />
         </Section>
 
         {game === "ej" ? (
@@ -241,7 +256,12 @@ export default function Stats() {
               <p className="text-caption text-muted-foreground">{tp("stats.period.drawsInPeriod", euroDraws.length)}</p>
             </div>
             {euroDraws.length ? (
-              <FrequencyChart rows={euroRows} band={typicalBand(euroDraws.length, 2, era.euroPool)} tone="euro" />
+              <FrequencyChart
+                rows={euroRows}
+                band={typicalBand(euroDraws.length, 2, era.euroPool)}
+                tone="euro"
+                onSortByFrequency={() => setSortedByFrequency(true)}
+              />
             ) : (
               <p className="text-body text-muted-foreground">{t("stats.result.tooFew", { n: 0 })}</p>
             )}
@@ -249,7 +269,12 @@ export default function Stats() {
         ) : (
           <Section title={t("stats.freq.sz.title")} description={t("stats.freq.sz.note")}>
             {szDraws.length ? (
-              <FrequencyChart rows={szRows} band={typicalBand(szDraws.length, 1, 10)} tone="euro" />
+              <FrequencyChart
+                rows={szRows}
+                band={typicalBand(szDraws.length, 1, 10)}
+                tone="euro"
+                onSortByFrequency={() => setSortedByFrequency(true)}
+              />
             ) : (
               <p className="text-body text-muted-foreground">{t("stats.sz.tooFew")}</p>
             )}
@@ -297,6 +322,7 @@ export default function Stats() {
     <>
       <PageHeader title={title} eyebrow={eyebrow} />
       <HonestyNote className="mb-6">{t("stats.frame")}</HonestyNote>
+      <Hint control={hints} className="mb-6" />
       {body}
     </>
   );

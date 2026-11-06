@@ -1,4 +1,4 @@
-import { ChartColumn, CalendarDays, Dices, Info, Percent, Settings, Ticket, type LucideIcon } from "lucide-react";
+import { BookOpen, ChartColumn, CalendarDays, Dices, Info, Percent, Settings, Ticket, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   to: string;
@@ -18,6 +18,7 @@ export const MAIN_NAV: readonly NavItem[] = [
 
 /** Menu (phones) and the second block of the sidebar. */
 export const SECONDARY_NAV: readonly NavItem[] = [
+  { to: "/guide", key: "nav.guide", icon: BookOpen },
   { to: "/about", key: "nav.about", icon: Info },
   { to: "/settings", key: "nav.settings", icon: Settings },
 ];

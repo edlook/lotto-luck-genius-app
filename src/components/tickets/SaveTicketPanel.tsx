@@ -18,6 +18,10 @@ export interface SaveTicketPanelProps {
   label: string;
   /** Gold is reserved for one main action per screen; saving is secondary on the generator. */
   variant?: "primary" | "secondary";
+  /** DOM id of the save button (a tip can press it for the user). */
+  buttonId?: string;
+  /** Called with the ticket that was just written. */
+  onSaved?: (ticket: Ticket) => void;
 }
 
 /**
@@ -27,7 +31,7 @@ export interface SaveTicketPanelProps {
  * After saving, the button turns into "Open tickets" and takes focus: that is the third tap
  * of the "generate → save → check" flow.
  */
-export function SaveTicketPanel({ game, fields, source, label, variant = "secondary" }: SaveTicketPanelProps) {
+export function SaveTicketPanel({ game, fields, source, label, variant = "secondary", buttonId, onSaved }: SaveTicketPanelProps) {
   const { t, date, locale } = useI18n();
   const navigate = useNavigate();
   const [sz, setSz] = useState<number | null>(null);
@@ -48,6 +52,7 @@ export function SaveTicketPanel({ game, fields, source, label, variant = "second
     if (cfg.hasSuperzahl) ticket.superzahl = sz;
     if (!writeTickets((prev) => [ticket, ...prev], t)) return;
     setSaved({ id: ticket.id, date: drawDate });
+    onSaved?.(ticket);
     toast.success(t("generator.toast.saved", { date: date(drawDate) }), {
       action: { label: t("generator.toast.saved.action"), onClick: () => navigate(`/tickets?edit=${ticket.id}`) },
     });
@@ -79,7 +84,7 @@ export function SaveTicketPanel({ game, fields, source, label, variant = "second
           <NumberInput value={sz} onChange={setSz} min={0} max={9} className="max-w-28" locale={locale} />
         </Field>
       ) : null}
-      <Button variant={variant} size="lg" block icon={<Save />} onClick={save}>
+      <Button id={buttonId} variant={variant} size="lg" block icon={<Save />} onClick={save}>
         {label}
       </Button>
     </div>

@@ -4,6 +4,8 @@ import { Button, Card, EmptyState, Section } from "@/components/ui";
 import { Disclosure } from "@/components/common/Disclosure";
 import { useI18n } from "@/i18n/context";
 import { useAnalysis } from "@/hooks/useAnalysis";
+import { useHints } from "@/hooks/useHints";
+import { Hint } from "@/components/hints/Hint";
 import { euroPoolOn } from "@/lib/eras";
 import type { GameId } from "@/lib/games";
 import type { PopularityValidation, PopularityVerdict, ValidationDraw } from "@/lib/popularityValidation";
@@ -38,6 +40,22 @@ export function PopularityPanel({ game, draws, onSwitchToEj }: { game: GameId; d
     [game, draws],
   );
 
+  const r = job.status === "done" ? job.result : null;
+  const hints = useHints("backtest", () => ({
+    game,
+    strategiesNone: false,
+    popularity: r
+      ? {
+          verdict: r.verdict,
+          popular: r.popular.meanIndex,
+          unpopular: r.unpopular.meanIndex,
+          payPop: r.payout.popularMean,
+          payUnpop: r.payout.unpopularMean,
+          to: r.to,
+        }
+      : null,
+  }));
+
   if (game !== "ej") {
     return (
       <EmptyState
@@ -62,6 +80,8 @@ export function PopularityPanel({ game, draws, onSwitchToEj }: { game: GameId; d
         </Section>
         <RunControl state={job} onRun={() => job.start({ draws: input })} />
       </div>
+
+      <Hint control={hints} />
 
       {job.status === "done" ? (
         job.result ? <Results r={job.result} /> : <p className="text-body font-semibold">{t("backtest.p.tooFew")}</p>

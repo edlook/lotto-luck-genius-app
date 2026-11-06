@@ -13,6 +13,7 @@ const Stats = lazy(() => import("./pages/Stats"));
 const Backtest = lazy(() => import("./pages/Backtest"));
 const Odds = lazy(() => import("./pages/Odds"));
 const About = lazy(() => import("./pages/About"));
+const Guide = lazy(() => import("./pages/Guide"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="backtest" element={<Backtest />} />
             <Route path="odds" element={<Odds />} />
             <Route path="about" element={<About />} />
+            <Route path="guide" element={<Guide />} />
             <Route path="settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Route>

@@ -9,6 +9,8 @@ export interface FrequencyChartProps {
   /** Typical range of one count under random draws (E ± 2 sd). */
   band: { low: number; high: number };
   tone?: "main" | "euro";
+  /** Called when the table is sorted by frequency (a tip about frequencies follows). */
+  onSortByFrequency?: () => void;
 }
 
 /**
@@ -17,7 +19,7 @@ export interface FrequencyChartProps {
  * so small differences look as small as they are. The same data is in the table below
  * (screen readers get the table; the picture is labelled as such).
  */
-export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProps) {
+export function FrequencyChart({ rows, band, tone = "main", onSortByFrequency }: FrequencyChartProps) {
   const { t, num, date } = useI18n();
   const [sort, setSort] = useState<"number" | "frequency">("number");
   const sortId = useId();
@@ -106,7 +108,11 @@ export function FrequencyChart({ rows, band, tone = "main" }: FrequencyChartProp
             <select
               id={sortId}
               value={sort}
-              onChange={(e) => setSort(e.target.value as "number" | "frequency")}
+              onChange={(e) => {
+                const next = e.target.value as "number" | "frequency";
+                setSort(next);
+                if (next === "frequency") onSortByFrequency?.();
+              }}
               className="h-11 rounded-md border border-border-strong bg-background px-3 text-foreground"
             >
               <option value="number">{t("stats.sort.number")}</option>

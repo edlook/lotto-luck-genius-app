@@ -19,6 +19,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { focusLater } from "@/components/common/focus";
 import { TicketCard } from "@/components/tickets/TicketCard";
 import { RecoveryNotice } from "@/components/tickets/RecoveryNotice";
+import { Hint } from "@/components/hints/Hint";
 import { TicketEditor } from "@/components/tickets/TicketEditor";
 import { ticketCardId } from "@/components/tickets/ticketIds";
 import { useTicketTransfer } from "@/components/tickets/useTicketTransfer";
@@ -27,10 +28,12 @@ import { useI18n } from "@/i18n/context";
 import { useGame } from "@/hooks/useGame";
 import { useDraws } from "@/hooks/useDraws";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useHints } from "@/hooks/useHints";
 import { GAME_IDS } from "@/lib/games";
 import { berlinNow } from "@/lib/drawCalendar";
 import { useLocalStore } from "@/lib/storage/localStore";
 import { ticketsStore, type Ticket } from "@/lib/storage/stores";
+import { lastExportStore } from "@/lib/storage/onboarding";
 import { evaluateTicket } from "@/lib/ticketStatus";
 import { TICKET_FILTERS, matchesFilter, summarize, type TicketFilter } from "@/lib/ticketSummary";
 
@@ -67,6 +70,17 @@ export default function Tickets() {
   const own = useMemo(() => tickets.filter((x) => x.game === game), [tickets, game]);
   const evaluations = useMemo(() => own.map((tk) => evaluateTicket(tk, data.byDate, today)), [own, data.byDate, today]);
   const summary = summarize(evaluations);
+  const lastExportAt = useLocalStore(lastExportStore);
+  const hints = useHints("tickets", (now) => ({
+    game,
+    today,
+    now,
+    totalTickets: tickets.length,
+    entries: own.map((ticket, i) => ({ ticket, ev: evaluations[i]! })),
+    // Without the archive every draw would look "not loaded": say nothing about draws then.
+    archiveReady: !data.isLoading && !data.isError && data.draws.length > 0,
+    lastExportAt,
+  }));
   const visible = own.map((tk, i) => ({ tk, ev: evaluations[i]! })).filter(({ ev }) => matchesFilter(ev, filter));
   const otherGame = GAME_IDS.find((g) => g !== game)!;
   const otherCount = tickets.filter((x) => x.game === otherGame).length;
@@ -283,6 +297,18 @@ export default function Tickets() {
       {header}
       <div className="flex flex-col gap-5 pb-20 lg:pb-0">
         <RecoveryNotice />
+        <Hint
+          control={hints}
+          onAction={(a) => {
+            if (a.id === "specifySz" && a.ticketId) openEdit(a.ticketId);
+            else if (a.id === "export") transfer.exportAll();
+            else if (a.id === "claimed" && a.ticketId) {
+              const id = a.ticketId;
+              if (writeTickets((prev) => prev.map((x) => (x.id === id ? { ...x, claimed: true } : x)), t))
+                toast.success(t("tickets.toast.updated"));
+            }
+          }}
+        />
         {body}
       </div>
 

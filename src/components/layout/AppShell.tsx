@@ -17,6 +17,7 @@ import { GameSwitch } from "./GameSwitch";
 import { TopBar } from "./TopBar";
 import { PageFallback } from "./PageFallback";
 import { RouteErrorBoundary } from "./RouteErrorBoundary";
+import { TourHost } from "@/components/tour/TourHost";
 
 /** Scroll to top on navigation, or to the #anchor when present. */
 function useScrollManagement() {
@@ -93,6 +94,7 @@ export function AppShell() {
         </main>
       </div>
       <BottomNav waiting={waiting} />
+      <TourHost />
       <Toaster closeLabel={t("common.close")} />
     </div>
   );
