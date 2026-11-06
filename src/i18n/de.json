@@ -287,7 +287,7 @@
   "tickets.import.conflict.replace": "Ersetzen",
   "tickets.import.conflict.skip": "Überspringen",
   "tickets.storage.unavailable": "Der Browser erlaubt kein Speichern. Die Scheine gehen beim Schließen der Seite verloren.",
-  "tickets.storage.full": "Der Browserspeicher ist voll. Exportieren Sie nach JSON und löschen Sie nicht mehr benötigte Scheine.",
+  "tickets.storage.full": "Der Browserspeicher ist voll, der Schein wurde nicht gespeichert. Exportieren Sie nach JSON und löschen Sie nicht mehr benötigte Scheine.",
   "tickets.storage.exportNow": "Jetzt exportieren",
   "draws.title": "Ziehungen · {game}",
   "draws.status.source": "Quelle: {source}",
@@ -305,7 +305,7 @@
   "draws.quick.latest": "Letzte",
   "draws.quick.previous": "Vorherige",
   "draws.list.aria": "Ziehungsverlauf",
-  "draws.row.aria": "Ziehung vom {date}: {numbers}",
+  "draws.row.aria": "Ziehung vom {date}. {numbers}",
   "draws.row.myTickets": "Meine Scheine",
   "draws.epoch.divider": "Seit dem 25.03.2022 werden die Eurozahlen aus 12 gezogen (zuvor aus 10)",
   "draws.detail.title": "Ziehung vom {date} · {game}",
@@ -614,5 +614,14 @@
   "stats.sz.tooFew": "In diesem Zeitraum gibt es keine Ziehungen mit Superzahl.",
   "settings.userDraws.none": "Sie haben noch keine Ziehungen ergänzt.",
   "settings.userDraws.confirm": "Die von Ihnen ergänzten Ziehungen ({n}) löschen? Scheine für diese Termine warten dann wieder auf Daten.",
-  "settings.import.cancel": "Import abbrechen"
+  "settings.import.cancel": "Import abbrechen",
+  "tickets.result.possible": "Treffer: {n}. Stimmt die Superzahl des Scheins mit der Superzahl der Ziehung überein, ist das Gewinnklasse {class}. Geben Sie die Superzahl an.",
+  "tickets.result.possible.amount": "Gewinn: {amount}.",
+  "tickets.result.oldSystem": "Treffer: {n}. Für Ziehungen vor dem 04.05.2013 wird keine Gewinnklasse angegeben: Damals galten bei Lotto 6 aus 49 andere Regeln.",
+  "tickets.filter.possible": "Superzahl nötig",
+  "tickets.summary.possible.plural": "one: Noch {n} Ergebnis könnte Gewinnklasse 9 sein, wenn Sie die Superzahl angeben. Es zählt noch nicht als Gewinn. / other: Noch {n} Ergebnisse könnten Gewinnklasse 9 sein, wenn Sie die Superzahl angeben. Sie zählen noch nicht als Gewinne.",
+  "tickets.recovery.title": "Einige gespeicherte Scheine konnten nicht gelesen werden",
+  "tickets.recovery.body": "Die Originaldaten liegen als separate Kopie vor und gehen beim nächsten Speichern nicht verloren. Laden Sie die Kopie herunter und bewahren Sie sie auf: Sie lässt sich von Hand reparieren.",
+  "tickets.recovery.download": "Kopie vom {date} herunterladen",
+  "tickets.recovery.dismiss": "Kopie aus dem Browser löschen"
 }

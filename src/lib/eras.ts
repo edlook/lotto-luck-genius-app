@@ -30,3 +30,20 @@ export function ejEraOn(iso: string): EjEra {
 export function euroPoolOn(iso: string): number {
   return ejEraOn(iso).euroPool;
 }
+
+/**
+ * Prize-class order of each EuroJackpot era, taken from the official quota tables in the archive
+ * (the position + 1 is the class number). The order of "3+1", "2+2", "4+0" and "3+2" differs
+ * between eras, so a user-added draw of an older date must not use today's table (QA B6).
+ */
+export const EJ_CLASS_LABELS: Record<number, readonly string[]> = {
+  0: ["5+2", "5+1", "5+0", "4+2", "4+1", "4+0", "3+2", "3+1", "2+2", "3+0", "1+2", "2+1"],
+  1: ["5+2", "5+1", "5+0", "4+2", "4+1", "4+0", "3+2", "2+2", "3+1", "3+0", "1+2", "2+1"],
+  2: ["5+2", "5+1", "5+0", "4+2", "4+1", "3+2", "4+0", "2+2", "3+1", "3+0", "1+2", "2+1"],
+};
+
+/** Prize class (1 = best) of `main` + `euro` hits for a draw held on `iso`, null = no win. */
+export function ejClassOn(iso: string, main: number, euro: number): number | null {
+  const idx = EJ_CLASS_LABELS[ejEraOn(iso).id]!.indexOf(`${main}+${euro}`);
+  return idx >= 0 ? idx + 1 : null;
+}

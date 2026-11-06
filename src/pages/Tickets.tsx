@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { focusLater } from "@/components/common/focus";
 import { TicketCard } from "@/components/tickets/TicketCard";
+import { RecoveryNotice } from "@/components/tickets/RecoveryNotice";
 import { TicketEditor } from "@/components/tickets/TicketEditor";
 import { ticketCardId } from "@/components/tickets/ticketIds";
 import { useTicketTransfer } from "@/components/tickets/useTicketTransfer";
@@ -229,15 +230,22 @@ export default function Tickets() {
           ) : (
             <p className="text-caption text-muted-foreground">{t("tickets.summary.byClass.none")}</p>
           )}
+          {summary.possible > 0 ? (
+            <p className="border-t border-border pt-3 text-caption text-muted-foreground">
+              {tp("tickets.summary.possible", summary.possible)}
+            </p>
+          ) : null}
         </Card>
 
         <SegmentedControl<TicketFilter>
           label={t("tickets.filter.aria")}
-          options={TICKET_FILTERS.map((f) => ({ value: f, label: t(`tickets.filter.${f}`) }))}
+          options={TICKET_FILTERS.filter((f) => f !== "possible" || summary.possible > 0 || filter === "possible").map(
+            (f) => ({ value: f, label: t(`tickets.filter.${f}`) }),
+          )}
           value={filter}
           onChange={setFilter}
           block
-          className="flex-wrap"
+          columns={2}
         />
 
         {otherLine}
@@ -265,8 +273,6 @@ export default function Tickets() {
             }
           />
         )}
-        {/* Room for the floating "add" button on phones. */}
-        <div aria-hidden="true" className="h-16 lg:hidden" />
       </div>
     );
   }
@@ -274,7 +280,10 @@ export default function Tickets() {
   return (
     <>
       {header}
-      {body}
+      <div className="flex flex-col gap-5 pb-20 lg:pb-0">
+        <RecoveryNotice />
+        {body}
+      </div>
 
       {own.length ? (
         <Button

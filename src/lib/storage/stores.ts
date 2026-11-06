@@ -31,7 +31,11 @@ const ticketsParse = (raw: unknown): Ticket[] => {
   });
 };
 
-export const ticketsStore = createLocalStore<Ticket[]>("llg.tickets.v1", ticketsParse, []);
+// Anything that does not survive validation (broken JSON, a non-list, dropped entries) is backed up
+// before the next write and announced on the tickets screen (QA B3).
+export const ticketsStore = createLocalStore<Ticket[]>("llg.tickets.v1", ticketsParse, [], {
+  isLossy: (parsed, value) => !Array.isArray(parsed) || parsed.length !== (value as Ticket[]).length,
+});
 
 export function newId(): string {
   const b = new Uint8Array(8);
@@ -78,11 +82,15 @@ export function analyzeTicketImport(text: string, existing: Ticket[]): ImportAna
   if (list === null) return { valid: [], skipped: 0, conflicts: [], fresh: [], error: "format" };
   if (!list.length) return { valid: [], skipped: 0, conflicts: [], fresh: [], error: "empty" };
   const valid: Ticket[] = [];
+  const seen = new Set<string>();
   let skipped = 0;
   for (const item of list) {
     const r = parseTicket(item);
-    if (r) valid.push(r);
-    else skipped++;
+    // A second entry with the same id inside one file is skipped (QA B8).
+    if (r && !seen.has(r.id)) {
+      seen.add(r.id);
+      valid.push(r);
+    } else skipped++;
   }
   if (!valid.length) return { valid: [], skipped, conflicts: [], fresh: [], error: "format" };
   const byId = new Map(existing.map((t) => [t.id, t]));

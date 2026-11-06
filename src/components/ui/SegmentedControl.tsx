@@ -18,6 +18,8 @@ export interface SegmentedControlProps<T extends string> {
   orientation?: "horizontal" | "vertical";
   /** Stretch to the container width (segments share it equally). */
   block?: boolean;
+  /** Two even columns on narrow screens (4+ options), one row from 480 px. Labels may wrap. */
+  columns?: 2;
   className?: string;
 }
 
@@ -34,6 +36,7 @@ export function SegmentedControl<T extends string>({
   labelledBy,
   orientation = "horizontal",
   block = false,
+  columns,
   className,
 }: SegmentedControlProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -70,7 +73,13 @@ export function SegmentedControl<T extends string>({
       onKeyDown={onKeyDown}
       className={cx(
         "gap-1 rounded-md border border-border-strong bg-background p-1",
-        orientation === "vertical" ? "flex flex-col" : block ? "flex" : "inline-flex",
+        orientation === "vertical"
+          ? "flex flex-col"
+          : columns === 2
+            ? "grid grid-cols-2 min-[480px]:flex"
+            : block
+              ? "flex"
+              : "inline-flex",
         className,
       )}
     >
@@ -89,7 +98,8 @@ export function SegmentedControl<T extends string>({
             lang={o.lang}
             onClick={() => onChange(o.value)}
             className={cx(
-              "min-h-11 rounded-sm px-3 text-body font-semibold whitespace-nowrap",
+              "min-h-11 rounded-sm px-3 text-body font-semibold",
+              columns === 2 ? "whitespace-normal min-[480px]:whitespace-nowrap" : "whitespace-nowrap",
               "transition-[background-color,color,box-shadow] duration-150 ease-out",
               orientation === "vertical" ? "text-left" : "flex-1 text-center",
               selected

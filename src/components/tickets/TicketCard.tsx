@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { Link } from "react-router";
-import { CalendarClock, CircleDashed, Pencil, Trash2, Trophy, TriangleAlert } from "lucide-react";
+import { CalendarClock, CircleDashed, CircleHelp, Pencil, Trash2, Trophy, TriangleAlert } from "lucide-react";
 import { BallRow, Button, ButtonLink, Card } from "@/components/ui";
 import { useI18n } from "@/i18n/context";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -29,6 +29,23 @@ function FieldResult({ check, game }: { check: FieldCheck; game: Ticket["game"] 
   const { t, money } = useI18n();
   const k = check.mainHits.length;
   if (check.cls === null) {
+    if (check.classUnavailable) {
+      return <span className="text-muted-foreground">{t("tickets.result.oldSystem", { n: k })}</span>;
+    }
+    if (check.possibleCls !== null) {
+      // Not a win: it depends on a Superzahl the ticket does not have yet.
+      return (
+        <span className="inline-flex items-start gap-1.5 text-foreground">
+          <CircleHelp aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
+          <span>
+            {t("tickets.result.possible", { n: k, class: check.possibleCls })}
+            {check.possibleAmount !== null
+              ? ` ${t("tickets.result.possible.amount", { amount: money(check.possibleAmount) })}`
+              : ""}
+          </span>
+        </span>
+      );
+    }
     return <span className="text-muted-foreground">{t("tickets.result.noWin")}</span>;
   }
   const amount =

@@ -287,7 +287,7 @@
   "tickets.import.conflict.replace": "Replace",
   "tickets.import.conflict.skip": "Skip",
   "tickets.storage.unavailable": "The browser does not allow saving data. Tickets will be lost when you close the page.",
-  "tickets.storage.full": "Browser storage is full. Export to JSON and delete tickets you no longer need.",
+  "tickets.storage.full": "Browser storage is full, the ticket was not saved. Export to JSON and delete tickets you no longer need.",
   "tickets.storage.exportNow": "Export now",
   "draws.title": "Draws · {game}",
   "draws.status.source": "Source: {source}",
@@ -305,7 +305,7 @@
   "draws.quick.latest": "Latest",
   "draws.quick.previous": "Previous",
   "draws.list.aria": "Draw history",
-  "draws.row.aria": "Draw on {date}: {numbers}",
+  "draws.row.aria": "Draw on {date}. {numbers}",
   "draws.row.myTickets": "My tickets",
   "draws.epoch.divider": "From 25 March 2022 the Euro numbers are drawn from 12 (previously from 10)",
   "draws.detail.title": "Draw on {date} · {game}",
@@ -614,5 +614,14 @@
   "stats.sz.tooFew": "There are no draws with a Superzahl in this period.",
   "settings.userDraws.none": "You have not added any draws yet.",
   "settings.userDraws.confirm": "Delete the draws you added ({n})? Tickets for these dates will wait for data again.",
-  "settings.import.cancel": "Cancel import"
+  "settings.import.cancel": "Cancel import",
+  "tickets.result.possible": "Matches: {n}. If the ticket's Superzahl matches the draw's Superzahl, this is class {class}. Enter the Superzahl.",
+  "tickets.result.possible.amount": "Prize: {amount}.",
+  "tickets.result.oldSystem": "Matches: {n}. No class is given for draws before 4 May 2013: Lotto 6 aus 49 had different rules then.",
+  "tickets.filter.possible": "Superzahl needed",
+  "tickets.summary.possible.plural": "one: {n} more result could be class 9 if you enter the Superzahl. It does not count as a win yet. / other: {n} more results could be class 9 if you enter the Superzahl. They do not count as wins yet.",
+  "tickets.recovery.title": "Some saved tickets could not be read",
+  "tickets.recovery.body": "The original data is kept as a separate copy and will not be lost by saving something new. Download the copy and keep it: it can be repaired by hand.",
+  "tickets.recovery.download": "Download copy from {date}",
+  "tickets.recovery.dismiss": "Delete the copy from the browser"
 }

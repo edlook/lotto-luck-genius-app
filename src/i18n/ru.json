@@ -287,7 +287,7 @@
   "tickets.import.conflict.replace": "Заменить",
   "tickets.import.conflict.skip": "Пропустить",
   "tickets.storage.unavailable": "Браузер не даёт сохранять данные. Билеты не будут сохранены после закрытия страницы.",
-  "tickets.storage.full": "Память браузера заполнена. Сделайте экспорт JSON и удалите ненужные билеты.",
+  "tickets.storage.full": "Память браузера заполнена, билет не сохранён. Сделайте экспорт JSON и удалите ненужные билеты.",
   "tickets.storage.exportNow": "Экспортировать сейчас",
   "draws.title": "Тиражи · {game}",
   "draws.status.source": "Источник: {source}",
@@ -305,7 +305,7 @@
   "draws.quick.latest": "Последний",
   "draws.quick.previous": "Предыдущий",
   "draws.list.aria": "История тиражей",
-  "draws.row.aria": "Тираж {date}: {numbers}",
+  "draws.row.aria": "Тираж {date}. {numbers}",
   "draws.row.myTickets": "Мои билеты",
   "draws.epoch.divider": "С 25.03.2022 Euro-числа из 12 (раньше из 10)",
   "draws.detail.title": "Тираж {date} · {game}",
@@ -614,5 +614,14 @@
   "stats.sz.tooFew": "Тиражей с Superzahl в этом периоде нет.",
   "settings.userDraws.none": "Вы пока не добавляли тиражей.",
   "settings.userDraws.confirm": "Удалить добавленные вами тиражи ({n})? Билеты на эти даты снова будут ждать данных.",
-  "settings.import.cancel": "Отменить импорт"
+  "settings.import.cancel": "Отменить импорт",
+  "tickets.result.possible": "Совпадений: {n}. Если Superzahl билета совпадёт с Superzahl тиража, это класс {class}. Укажите Superzahl.",
+  "tickets.result.possible.amount": "Приз: {amount}.",
+  "tickets.result.oldSystem": "Совпадений: {n}. Для тиражей до 04.05.2013 класс не определяется: тогда в Lotto 6 aus 49 были другие правила.",
+  "tickets.filter.possible": "Нужна Superzahl",
+  "tickets.summary.possible.plural": "one: Ещё {n} результат может оказаться классом 9, если указать Superzahl. Выигрышем он пока не считается. / few: Ещё {n} результата могут оказаться классом 9, если указать Superzahl. Выигрышем они пока не считаются. / many: Ещё {n} результатов могут оказаться классом 9, если указать Superzahl. Выигрышем они пока не считаются.",
+  "tickets.recovery.title": "Часть сохранённых билетов не удалось прочитать",
+  "tickets.recovery.body": "Исходные данные сохранены отдельной копией и не потеряются при новой записи. Скачайте копию и сохраните её: её можно будет разобрать вручную.",
+  "tickets.recovery.download": "Скачать копию от {date}",
+  "tickets.recovery.dismiss": "Удалить копию из браузера"
 }
