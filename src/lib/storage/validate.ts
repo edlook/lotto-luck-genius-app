@@ -41,6 +41,8 @@ export interface Ticket {
   drawDates: string[];
   createdAt: string;
   note?: string;
+  /** The user marked the prize as paid out (silences the limitation-period hints). Optional: older tickets have none. */
+  claimed?: boolean;
   source: "generator" | "manual";
 }
 
@@ -57,7 +59,7 @@ function parseField(raw: unknown, game: GameId): TicketField | null {
 
 export function parseTicket(raw: unknown): Ticket | null {
   if (!isObj(raw)) return null;
-  const { id, game, fields, superzahl, drawDates, createdAt, note, source } = raw;
+  const { id, game, fields, superzahl, drawDates, createdAt, note, claimed, source } = raw;
   if (typeof id !== "string" || id.length < 1 || id.length > 64) return null;
   if (!isGameId(game)) return null;
   if (!Array.isArray(fields) || fields.length < 1 || fields.length > 24) return null;
@@ -66,6 +68,7 @@ export function parseTicket(raw: unknown): Ticket | null {
     return null;
   if (typeof createdAt !== "string") return null;
   if (note !== undefined && (typeof note !== "string" || note.length > 500)) return null;
+  if (claimed !== undefined && typeof claimed !== "boolean") return null;
   if (source !== "generator" && source !== "manual") return null;
   const parsed: TicketField[] = [];
   for (const f of fields) {
@@ -76,6 +79,8 @@ export function parseTicket(raw: unknown): Ticket | null {
   const t: Ticket = { id, game, fields: parsed, drawDates: [...drawDates], createdAt, source };
   if (superzahl !== undefined) t.superzahl = superzahl;
   if (note !== undefined) t.note = note;
+  // Only the "true" state is kept: absent means not marked.
+  if (claimed === true) t.claimed = true;
   return t;
 }
 

@@ -23,6 +23,8 @@ export interface TicketDraft {
   count: number | null;
   superzahl: number | null;
   note: string;
+  /** "Prize paid out" mark of an existing ticket. */
+  claimed?: boolean;
 }
 
 export const MAX_TICKET_FIELDS = 12;
@@ -104,6 +106,7 @@ export function draftToTicket(
   if (g.hasSuperzahl) t.superzahl = draft.superzahl;
   const note = draft.note.trim();
   if (note) t.note = note.slice(0, 500);
+  if (draft.claimed) t.claimed = true;
   return t;
 }
 
@@ -118,5 +121,6 @@ export function ticketToDraft(t: Ticket): TicketDraft {
     count: dates.length > 1 ? dates.length : 2,
     superzahl: t.superzahl ?? null,
     note: t.note ?? "",
+    claimed: t.claimed === true,
   };
 }

@@ -160,14 +160,21 @@ export function TicketCard({ ticket, evaluation: ev, onEdit, onDelete, level = 2
         <H id={headingId} className="text-body font-bold text-foreground">
           {title}
         </H>
-        {ev.status === "won" && ev.bestClass !== null ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-caption font-semibold text-success">
-            <Trophy aria-hidden="true" className="size-3.5" />
-            {dates.length > 1 && !onlyDate
-              ? t("tickets.result.bestOfSeries", { class: ev.bestClass })
-              : `${t("common.class")} ${ev.bestClass}`}
-          </span>
-        ) : null}
+        <span className="flex flex-wrap items-center gap-1.5">
+          {ev.status === "won" && ev.bestClass !== null ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-caption font-semibold text-success">
+              <Trophy aria-hidden="true" className="size-3.5" />
+              {dates.length > 1 && !onlyDate
+                ? t("tickets.result.bestOfSeries", { class: ev.bestClass })
+                : `${t("common.class")} ${ev.bestClass}`}
+            </span>
+          ) : null}
+          {ticket.claimed && ev.status === "won" ? (
+            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-caption font-semibold text-muted-foreground">
+              {t("tickets.card.claimed")}
+            </span>
+          ) : null}
+        </span>
       </header>
 
       <ul className="flex flex-col gap-3">

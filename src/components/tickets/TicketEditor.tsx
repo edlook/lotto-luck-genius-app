@@ -298,6 +298,26 @@ function EditorForm({
           onChange={(e) => update({ note: e.target.value })}
         />
       </Field>
+
+      {ticket ? (
+        // The limitation-period tips (guide.won.deadline) stop for a ticket marked as paid out.
+        <div className="flex flex-col gap-1">
+          <label htmlFor={`${ids}-claimed`} className="flex min-h-11 cursor-pointer items-center gap-3 font-semibold">
+            <input
+              id={`${ids}-claimed`}
+              type="checkbox"
+              checked={draft.claimed === true}
+              aria-describedby={`${ids}-claimed-help`}
+              onChange={(e) => update({ claimed: e.target.checked })}
+              className="size-6 shrink-0 accent-primary"
+            />
+            {t("tickets.drawer.claimed.label")}
+          </label>
+          <p id={`${ids}-claimed-help`} className="pl-9 text-caption text-muted-foreground">
+            {t("tickets.drawer.claimed.help")}
+          </p>
+        </div>
+      ) : null}
     </form>
   );
 }
