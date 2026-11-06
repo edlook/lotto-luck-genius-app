@@ -270,6 +270,16 @@ export default function Stats() {
           </Section>
         ) : null}
 
+        <Card as="section" aria-labelledby="stats-backtest" className="flex flex-col gap-3">
+          <h2 id="stats-backtest" className="text-title-3 font-bold">
+            {t("stats.backtest.title")}
+          </h2>
+          <p className="text-body text-muted-foreground">{t("stats.backtest.body")}</p>
+          <ButtonLink to="/backtest" variant="secondary" className="self-start">
+            {t("stats.backtest.link")}
+          </ButtonLink>
+        </Card>
+
         <Section title={t("stats.why.title")}>
           <div className="flex flex-col gap-2">
             {(["independence", "gambler", "p"] as const).map((k) => (

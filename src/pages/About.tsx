@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { Card, Section, Skeleton, SkeletonGroup } from "@/components/ui";
+import { ButtonLink, Card, Section, Skeleton, SkeletonGroup } from "@/components/ui";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { completenessText } from "@/components/common/completenessText";
 import { useI18n } from "@/i18n/context";
@@ -41,6 +41,7 @@ const SECTIONS = [
   { id: "generator", title: "about.generator.title" },
   { id: "odds", title: "about.odds.title" },
   { id: "stats", title: "about.stats.title" },
+  { id: "backtest", title: "about.backtest.title" },
   { id: "data", title: "about.data.title" },
   { id: "limits", title: "about.limits.title" },
 ] as const;
@@ -165,6 +166,15 @@ export default function About() {
           {["expected", "statistic", "montecarlo", "eras", "notForecast"].map((p) => (
             <P key={p} k={`about.stats.${p}`} />
           ))}
+        </Block>
+
+        <Block id="backtest" title={t("about.backtest.title")}>
+          {["p1", "p2", "p3"].map((p) => (
+            <P key={p} k={`about.backtest.${p}`} />
+          ))}
+          <ButtonLink to="/backtest" variant="secondary" className="self-start">
+            {t("about.backtest.link")}
+          </ButtonLink>
         </Block>
 
         <Block id="data" title={t("about.data.title")}>

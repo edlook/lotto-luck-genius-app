@@ -10,6 +10,7 @@ const Tickets = lazy(() => import("./pages/Tickets"));
 const Draws = lazy(() => import("./pages/Draws"));
 const DrawDetail = lazy(() => import("./pages/DrawDetail"));
 const Stats = lazy(() => import("./pages/Stats"));
+const Backtest = lazy(() => import("./pages/Backtest"));
 const Odds = lazy(() => import("./pages/Odds"));
 const About = lazy(() => import("./pages/About"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="draws/lotto/:date" element={<DrawAliasRedirect game="649" />} />
             <Route path="draws/:game/:date" element={<DrawDetail />} />
             <Route path="stats" element={<Stats />} />
+            <Route path="backtest" element={<Backtest />} />
             <Route path="odds" element={<Odds />} />
             <Route path="about" element={<About />} />
             <Route path="settings" element={<Settings />} />
