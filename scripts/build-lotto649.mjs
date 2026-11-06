@@ -36,8 +36,14 @@ lines.forEach((line, i) => {
   const cols = line.split(",");
   if (cols.length !== 8) throw new Error(`Row ${row}: expected 8 columns, got ${cols.length}`);
   const [date, ...rest] = cols;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T12:00:00Z`))) {
+  // The date must exist in the calendar (30 February passes Date.parse in V8) and, from the
+  // Wednesday + Saturday schedule on, fall on a draw weekday.
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00Z`) : null;
+  if (!parsed || Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
     throw new Error(`Row ${row}: bad date ${date}`);
+  }
+  if (date >= "2000-12-06" && ![3, 6].includes(parsed.getUTCDay())) {
+    throw new Error(`Row ${row}: ${date} is not a Wednesday or Saturday`);
   }
   if (date <= prev) throw new Error(`Row ${row}: dates not strictly increasing (${prev} -> ${date})`);
   prev = date;

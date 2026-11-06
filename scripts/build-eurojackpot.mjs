@@ -9,6 +9,10 @@
  * - file name date == head.datum, dates strictly increasing;
  * - "spielformel" parsed into a format era (main pool / euro pool);
  * - 5 distinct main numbers within 1..mainPool, 2 distinct Euro numbers within 1..euroPool.
+ * - quotas: exactly the 12 classes of the game (each label once), winners an integer >= 0,
+ *   amount a finite number >= 0, published stake > 0. A missing or incomplete quota table
+ *   (e.g. a draw fetched before the operator published it) aborts: delete that raw file and
+ *   run the fetch again (the fetch script re-downloads incomplete files itself).
  * Prize quotas are kept as published: [label "k + m", winners, amount EUR] per class,
  * plus the jackpot amount when class 1 had no winner.
  * `payout.share` = actual long-run payout share computed from those quotas and stakes.
@@ -31,6 +35,7 @@ try {
   /* optional */
 }
 
+const CLASS_LABELS = ["5+2", "5+1", "5+0", "4+2", "4+1", "4+0", "3+2", "3+1", "2+2", "3+0", "1+2", "2+1"];
 const draws = [];
 const eras = [];
 let prev = "";
@@ -61,14 +66,25 @@ for (const f of files) {
     era = { id: eras.length, formula, mainPool, euroPool, from: date, to: null };
     eras.push(era);
   }
-  const classes = doc.auswertung?.quoten?.hauptlotterie?.ziehungen?.[0]?.gewinnklassen ?? [];
-  const quotes = classes.map((c) => [
-    String(c.kurzbeschreibung ?? "").replace(/\s+/g, ""),
-    Number(c.anzahl ?? 0),
-    Number(c.quote ?? 0),
-  ]);
+  const classes = doc.auswertung?.quoten?.hauptlotterie?.ziehungen?.[0]?.gewinnklassen;
+  if (!Array.isArray(classes) || classes.length !== CLASS_LABELS.length) {
+    throw new Error(`${f}: expected ${CLASS_LABELS.length} prize classes, got ${Array.isArray(classes) ? classes.length : "none"}`);
+  }
+  const quotes = classes.map((c) => {
+    const label = String(c.kurzbeschreibung ?? "").replace(/\s+/g, "");
+    const winners = Number(c.anzahl);
+    const amount = Number(c.quote);
+    if (c.anzahl === undefined || c.anzahl === null || c.anzahl === "" || !Number.isInteger(winners) || winners < 0)
+      throw new Error(`${f}: class ${label}: invalid winners ${JSON.stringify(c.anzahl)}`);
+    if (c.quote === undefined || c.quote === null || c.quote === "" || !Number.isFinite(amount) || amount < 0)
+      throw new Error(`${f}: class ${label}: invalid quota ${JSON.stringify(c.quote)}`);
+    return [label, winners, amount];
+  });
+  if ([...quotes.map((q) => q[0])].sort().join() !== [...CLASS_LABELS].sort().join())
+    throw new Error(`${f}: prize class labels differ from the game: ${quotes.map((q) => q[0]).join(" ")}`);
   const jackpot = classes.find((c) => c.klasse === 1)?.jackpot ?? null;
-  const stake = doc.auswertung?.spieleinsatz?.hauptlotterie ?? null;
+  const stake = Number(doc.auswertung?.spieleinsatz?.hauptlotterie);
+  if (!Number.isFinite(stake) || stake <= 0) throw new Error(`${f}: invalid stake ${JSON.stringify(doc.auswertung?.spieleinsatz?.hauptlotterie)}`);
   draws.push([date, [...main].sort((a, b) => a - b), [...euro].sort((a, b) => a - b), era.id, quotes, jackpot, stake]);
 }
 eras[eras.length - 1].to = null; // current era is open-ended

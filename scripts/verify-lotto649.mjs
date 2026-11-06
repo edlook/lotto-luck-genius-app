@@ -37,14 +37,21 @@ const mismatches = [];
 for (const idx of [...picks].sort((a, b) => a - b)) {
   const [date, main, sz] = pool[idx];
   await sleep(delay);
-  const res = await fetch(
-    `${BASE}?client=jsn&gruppe=ZahlenUndQuoten&spielart=LOTTO&historie=ja&lang=de&datum=${date}`,
-  );
-  if (!res.ok) {
-    mismatches.push({ date, reason: `HTTP ${res.status}` });
+  let doc;
+  try {
+    const res = await fetch(
+      `${BASE}?client=jsn&gruppe=ZahlenUndQuoten&spielart=LOTTO&historie=ja&lang=de&datum=${date}`,
+    );
+    if (!res.ok) {
+      mismatches.push({ date, reason: `HTTP ${res.status}` });
+      continue;
+    }
+    doc = await res.json();
+  } catch (e) {
+    // A network failure is a failed check, never a silently unverified file (QA B12).
+    mismatches.push({ date, reason: `request failed: ${e instanceof Error ? e.message : e}` });
     continue;
   }
-  const doc = await res.json();
   const z = doc?.zahlen?.hauptlotterie?.ziehungen?.[0];
   const offMain = (z?.zahlenSortiert ?? []).map(Number);
   const offSz = z?.superzahl === "" || z?.superzahl == null ? null : Number(z.superzahl);

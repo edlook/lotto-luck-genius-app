@@ -66,9 +66,17 @@ await writeFile(csvPath, await csv.text());
 run("build-lotto649.mjs", [csvPath, `--commit=${sha}`, `--fetched-at=${new Date().toISOString()}`]);
 // Third-party archive: spot-check a random sample + the latest draw against official WestLotto data.
 console.log("\nLotto 6aus49: spot-check against WestLotto …");
-run("verify-lotto649.mjs", ["--n=10", "--delay=800", "--write"]);
+try {
+  run("verify-lotto649.mjs", ["--n=10", "--delay=800", "--write"]);
+} catch {
+  console.warn("WARNING: the WestLotto check did not finish — lotto649.json has no `verification`; do not commit before re-running it.");
+  process.exitCode = 1;
+}
 const verification = JSON.parse(await readFile(dataFile("lotto649.json"), "utf8")).verification;
-if (verification?.mismatches) {
+if (!verification) {
+  console.warn("WARNING: lotto649.json has no `verification` — run `npm run data:lotto649:verify -- --write`.");
+  process.exitCode = 1;
+} else if (verification.mismatches) {
   console.warn(`WARNING: ${verification.mismatches} mismatch(es) with WestLotto — do not commit before checking.`);
   process.exitCode = 1;
 }
