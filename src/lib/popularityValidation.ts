@@ -13,7 +13,7 @@
  */
 import { classCombinations, binom } from "./odds";
 import { GAMES } from "./games";
-import { evaluatePopularity, type PopularityLevel } from "./popularity";
+import { evaluatePopularity } from "./popularity";
 import { createSeededRandom } from "./seededRng";
 
 /**
@@ -57,7 +57,6 @@ export function classProbability(label: string, euroPool: number): number {
 export interface DrawRow {
   date: string;
   low: number;
-  level: PopularityLevel;
   fields: number;
   /** observed / expected per class label */
   index: Record<string, number>;
@@ -100,7 +99,6 @@ export function buildRows(draws: readonly ValidationDraw[], labels: readonly str
     rows.push({
       date: d.date,
       low: d.main.filter((n) => n <= CALENDAR_MAX).length,
-      level: report.level,
       fields,
       index,
       winners,
@@ -286,7 +284,6 @@ export interface PopularityValidation {
   correlation: CorrelationResult;
   verdict: PopularityVerdict;
   byLow: { low: number; n: number; meanIndex: number }[];
-  byLevel: { level: PopularityLevel; n: number; meanIndex: number }[];
   /** How many draws met each rare rule: too few to measure anything. */
   rare: { progression: number; consecutive: number; multiples: number };
   checks: ClassCheck[];
@@ -365,10 +362,6 @@ export function analysePopularity(
     byLow: [0, 1, 2, 3, 4, 5].map((low) => {
       const rs = rows.filter((r) => r.low === low);
       return { low, n: rs.length, meanIndex: rs.length ? mean(idx(rs, P)) : NaN };
-    }),
-    byLevel: (["low", "medium", "high"] as const).map((level) => {
-      const rs = rows.filter((r) => r.level === level);
-      return { level, n: rs.length, meanIndex: rs.length ? mean(idx(rs, P)) : NaN };
     }),
     rare: {
       progression: rows.filter((r) => r.progression).length,
