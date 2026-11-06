@@ -17,7 +17,7 @@
  * Prints old → new draw counts and last dates. Personal, non-commercial use only.
  */
 import { execFileSync } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -43,7 +43,11 @@ const ejDir = path.join(cache, "eurojackpot");
 await mkdir(ejDir, { recursive: true });
 const year = new Date().getFullYear();
 // Only the current (and, in early January, previous) year can hold new dates.
-const fromYear = before.ej.count > 0 ? (new Date().getMonth() === 0 ? year - 1 : year) : 2012;
+// A cache with fewer raw files than the archive has draws (fresh CI runner, cleared cache) must be
+// refilled from 2012, otherwise the rebuild would shrink the archive.
+const cached = (await readdir(ejDir)).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).length;
+const cacheComplete = before.ej.count > 0 && cached >= before.ej.count;
+const fromYear = cacheComplete ? (new Date().getMonth() === 0 ? year - 1 : year) : 2012;
 console.log(`\nEuroJackpot: fetching missing dates from ${fromYear} …`);
 run("fetch-eurojackpot.mjs", [ejDir, `--from-year=${fromYear}`]);
 run("build-eurojackpot.mjs", [ejDir]);

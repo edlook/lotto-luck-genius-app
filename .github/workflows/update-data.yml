@@ -1,0 +1,66 @@
+name: Update draw archives
+
+# After each draw (EuroJackpot: Tue, Fri; Lotto 6aus49: Wed, Sat) and once more the next morning,
+# because the third-party 6aus49 archive can lag behind. Quiet runs commit nothing.
+on:
+  schedule:
+    - cron: "30 22 * * 2,3,5,6"
+    - cron: "0 7 * * 3,4,6,0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Raw EuroJackpot downloads: the first run fetches the whole history (~12 min), later runs
+      # only the missing dates.
+      - uses: actions/cache@v4
+        with:
+          path: .data-cache
+          key: llg-data-${{ github.run_id }}
+          restore-keys: llg-data-
+      # Fails (and commits nothing) if an archive shrinks or the WestLotto spot-check finds a mismatch.
+      - run: npm run data:update
+      - name: Commit and deploy if the draws changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Only the timestamps and the spot-check sample change on quiet runs: compare draw counts.
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            import { execFileSync } from "node:child_process";
+            let changed = false;
+            for (const f of ["eurojackpot", "lotto649"]) {
+              const now = JSON.parse(readFileSync(`public/data/${f}.json`, "utf8"));
+              let old = { draws: [] };
+              try { old = JSON.parse(execFileSync("git", ["show", `HEAD:public/data/${f}.json`], { maxBuffer: 1 << 28 }).toString()); } catch {}
+              if (JSON.stringify(now.draws) !== JSON.stringify(old.draws)) changed = true;
+            }
+            process.stdout.write(changed ? "yes" : "no");
+          ' > changed.txt
+          if [ "$(cat changed.txt)" = "yes" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/data/eurojackpot.json public/data/lotto649.json
+            git commit -m "Update draw archives"
+            git push
+            # Pushes made with GITHUB_TOKEN do not start other workflows: run the deploy explicitly.
+            gh workflow run deploy.yml --ref main
+          else
+            echo "No new draws."
+          fi

@@ -48,7 +48,7 @@ interface RawArchive {
 }
 
 export async function fetchArchive(game: GameId): Promise<Archive> {
-  const res = await fetch(`/data/${GAMES[game].dataFile}`, { cache: "no-cache" });
+  const res = await fetch(`${import.meta.env.BASE_URL}data/${GAMES[game].dataFile}`, { cache: "no-cache" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const raw = (await res.json()) as RawArchive;
   const eraPool = new Map((raw.eras ?? []).map((e) => [e.id, e.euroPool]));

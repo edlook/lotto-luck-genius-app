@@ -24,7 +24,7 @@ function DrawAliasRedirect({ game }: { game: GameId }) {
 export default function App() {
   return (
     <I18nProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <Routes>
           <Route element={<AppShell />}>
             <Route index element={<Generator />} />

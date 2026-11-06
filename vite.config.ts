@@ -7,8 +7,12 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string };
 const BG = "#151c28"; // hsl(220 30% 12%) = --background
+// Sub-path deployments (GitHub Pages: /<repo>/) set VITE_BASE; local dev and root hosting use "/".
+const rawBase = process.env.VITE_BASE ?? "/";
+const BASE = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
 export default defineConfig({
+  base: BASE,
   define: {
     __APP_VERSION__: JSON.stringify(`${pkg.version} (${new Date().toISOString().slice(0, 10)})`),
   },
@@ -32,8 +36,8 @@ export default defineConfig({
         // App shell, all screen chunks, fonts and icons are precached; draw data is cached at runtime.
         globPatterns: ["**/*.{js,css,html,woff2,svg,png,ico}"],
         globIgnores: ["data/**"],
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/data\//],
+        navigateFallback: `${BASE}index.html`,
+        navigateFallbackDenylist: [/\/data\//],
         cleanupOutdatedCaches: true,
         // The registration script is injected as "script-defer", so the plugin does not add these
         // itself (QA B1): without them a new worker stays in "waiting" until every tab is closed.
@@ -44,7 +48,7 @@ export default defineConfig({
           {
             // Draw archives: the network first (QA B5: a stale copy would hide the newest draw for a
             // whole session), the cached copy when offline or when the network takes over 3 s.
-            urlPattern: ({ url }) => url.pathname.startsWith("/data/") && url.pathname.endsWith(".json"),
+            urlPattern: ({ url }) => url.pathname.startsWith(`${BASE}data/`) && url.pathname.endsWith(".json"),
             handler: "NetworkFirst",
             options: {
               cacheName: "llg-draw-data",
@@ -56,7 +60,7 @@ export default defineConfig({
         ],
       },
       manifest: {
-        id: "/",
+        id: BASE,
         name: "Lotto-Luck-Genius",
         short_name: "LLG",
         description:
@@ -67,8 +71,8 @@ export default defineConfig({
         background_color: BG,
         display: "standalone",
         orientation: "portrait",
-        scope: "/",
-        start_url: "/",
+        scope: BASE,
+        start_url: BASE,
         categories: ["utilities", "productivity"],
         icons: [
           { src: "pwa-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" },
